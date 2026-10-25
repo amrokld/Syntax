@@ -31,6 +31,11 @@ const LANGUAGE_LABELS = {
   javascript: 'JavaScript',
   python: 'Python',
   json: 'JSON',
+  typescript: 'TypeScript',
+  cpp: 'C++',
+  java: 'Java',
+  rust: 'Rust',
+  sql: 'SQL',
 };
 
 function wrapSource(source, maxChars = MAX_LINE_CHARS) {
@@ -78,6 +83,57 @@ function EyeIcon() {
   );
 }
 
+
+
+
+
+function buildPrompt(message, language, instructions) {
+  return `You are a creative code artist. Transform the original message into an expressive, visually interesting code composition.
+
+LANGUAGE:
+${language}
+
+ORIGINAL MESSAGE:
+"""
+${message}
+"""
+
+CREATIVE DIRECTION:
+${instructions.trim() || 'Interpret the message creatively. Choose a distinctive concept and style.'}
+
+REQUIREMENTS:
+- Create a complete, self-contained code composition.
+- HARD LIMIT: 20 physical code lines maximum.
+- Aim for 12–18 lines, leaving room for a meaningful ending.
+- Count blank lines and comments as lines.
+- Markdown fences do not count toward the limit.
+- Plan the entire composition before writing it.
+- Verify the line count before responding. If it exceeds 20 lines, redesign it more concisely.
+- Never exceed the limit or omit the ending to meet it.
+- Make the code itself communicate the message's meaning and emotional subtext.
+- Use creative names, structures, functions, conditions, and meaningful comments where appropriate.
+- Every line must contribute to the composition.
+- Avoid generic templates, filler, and pointless complexity.
+- Preserve the original message's meaning and emotional nuance.
+- Use syntax appropriate to the selected language.
+
+OUTPUT FORMAT:
+- Return exactly one Markdown code block.
+- Use the correct language identifier after the opening triple backticks.
+- Include no introduction, explanation, or conclusion outside the code block.
+- Return the complete composition, including its intended final line.
+- Do not return a fragment or exceed 20 physical code lines.
+
+Example format:
+\`\`\`${language.toLowerCase()}
+your code here
+\`\`\``;
+}
+
+
+
+
+
 function App() {
   const [source, setSource] = useState(SAMPLE_CODE);
   const [originalMessage, setOriginalMessage] = useState(SAMPLE_MESSAGE);
@@ -102,6 +158,11 @@ function App() {
   const language = languageOverride || detectedLanguage;
   const languageModule = useMemo(() => getLanguageModule(language), [language]);
 
+  const [draftMessage, setDraftMessage] = useState(SAMPLE_MESSAGE);
+  const [promptInstructions, setPromptInstructions] = useState('');
+  const [generatedPrompt, setGeneratedPrompt] = useState('');
+  const [editorMode, setEditorMode] = useState('prompt');
+
   const wrappedSource = useMemo(
     () => wrapSource(source, maxLineChars),
     [source, maxLineChars]
@@ -110,6 +171,16 @@ function App() {
   const lines = wrappedSource.split('\n');
   const visibleSource = wrappedSource.slice(0, visibleChars);
   const complete = visibleChars >= wrappedSource.length;
+
+  const livePrompt = useMemo(
+    () =>
+      buildPrompt(
+        draftMessage,
+        LANGUAGE_LABELS[language] || language,
+        promptInstructions
+      ),
+    [draftMessage, language, promptInstructions]
+  );
 
   const highlighted = useMemo(() => {
     const grammar =
@@ -225,20 +296,22 @@ function App() {
     setPlaying(true);
   }
 
+
   function handleSubmit(event) {
     event.preventDefault();
+
     const form = event.currentTarget;
-    const newCode = form.elements.code.value;
-    const newMessage = form.elements.message.value;
+    const newCode = form.elements.code.value.trim();
+
+    if (!newCode) return;
 
     setSource(newCode);
-    setOriginalMessage(newMessage);
-    setLanguageOverride(null);
     setShowMessage(false);
     setShowComposer(false);
     setShowSpeedOptions(false);
     setShowLanguageOptions(false);
   }
+
 
   function chooseLanguage(languageId) {
     setShowLanguageOptions(false);
@@ -307,6 +380,18 @@ function App() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [reducedMotion, wrappedSource.length]);
 
+  function handleGeneratePrompt(event) {
+    event.preventDefault();
+
+    const message = draftMessage.trim();
+    if (!message) return;
+
+    setOriginalMessage(message);
+    setDraftMessage(message);
+    setGeneratedPrompt('');
+  }
+
+
   return (
     <main className="stage">
       <section
@@ -354,6 +439,10 @@ function App() {
       )}
 
       <div className="quiet-controls" aria-label="Playback controls">
+        <span className="brand-word">Syntax</span>
+
+        <span className="brand-line" aria-hidden="true" />
+
         <button
           className="control-button"
           onClick={() => setPlaying((current) => !current)}
@@ -445,8 +534,8 @@ function App() {
         <button
           className="control-button"
           onClick={() => setShowMessage(true)}
-          data-tooltip="Original message · M"
-          aria-label="View original message"
+          data-tooltip="Edit original message · M"
+          aria-label="Edit original message"
         >
           <EyeIcon />
         </button>
@@ -463,51 +552,179 @@ function App() {
         </button>
       </div>
 
+
       {showComposer && (
         <div
           className="composer-overlay"
           role="presentation"
           onClick={() => setShowComposer(false)}
         >
-          <form
-            className="composer"
-            onSubmit={handleSubmit}
+          <section
+            className="prompt-studio"
             role="dialog"
-            aria-label="Edit code and original message"
+            aria-label="Syntax Prompt Studio"
             aria-modal="true"
             onClick={(event) => event.stopPropagation()}
           >
-            <div className="editor-field editor-code-field">
-              <label htmlFor="code-input">Code</label>
-              <textarea
-                id="code-input"
-                name="code"
-                defaultValue={source}
-                spellCheck="false"
-                autoFocus
-                required
-              />
+
+            <header className="prompt-studio-header">
+              <div>
+                <span className="prompt-eyebrow">SYNTAX / STUDIO</span>
+                <h2>Shape your message.</h2>
+              </div>
+
+              <button
+                type="button"
+                className="prompt-close"
+                onClick={() => setShowComposer(false)}
+                aria-label="Close editor"
+              >
+                ×
+              </button>
+            </header>
+
+            <nav className="studio-tabs" aria-label="Studio mode">
+              <button
+                type="button"
+                className={editorMode === 'prompt' ? 'active' : ''}
+                onClick={() => setEditorMode('prompt')}
+              >
+                <span>01</span> Generate Prompt
+              </button>
+
+              <button
+                type="button"
+                className={editorMode === 'import' ? 'active' : ''}
+                onClick={() => setEditorMode('import')}
+              >
+                <span>02</span> Import Code
+              </button>
+            </nav>
+
+
+
+            <div className="prompt-studio-panels">
+              {editorMode === 'prompt' ? (
+                <>
+                  <form
+                    className="prompt-controls"
+                    onSubmit={handleGeneratePrompt}
+                  >
+                    <div className="prompt-section-heading">
+                      <span>01</span>
+                      <h3>Configure your message</h3>
+                    </div>
+
+                    <div className="editor-field">
+                      <label htmlFor="message-input">Your message</label>
+                      <textarea
+                        id="message-input"
+                        name="message"
+                        value={draftMessage}
+                        onChange={(event) => setDraftMessage(event.target.value)}
+                        placeholder="What do you want to express?"
+                        required
+                      />
+                    </div>
+
+                    <div className="editor-field">
+                      <label htmlFor="language-select">Language</label>
+                      <select
+                        id="language-select"
+                        value={languageOverride || 'auto'}
+                        onChange={(event) => {
+                          const selected = event.target.value;
+                          setLanguageOverride(selected === 'auto' ? null : selected);
+                        }}
+                      >
+                        <option value="auto">Auto detect</option>
+                        {Object.entries(LANGUAGE_LABELS).map(([id, label]) => (
+                          <option key={id} value={id}>{label}</option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div className="editor-field">
+                      <label htmlFor="instructions-input">
+                        Additional instructions
+                      </label>
+                      <textarea
+                        id="instructions-input"
+                        value={promptInstructions}
+                        onChange={(event) => setPromptInstructions(event.target.value)}
+                        placeholder="Poetic, minimalist, recursive, dark..."
+                      />
+                    </div>
+
+                    <div className="prompt-control-footer">
+                      <span>Prompt preview updates live.</span>
+                      <button type="submit">Refresh prompt ↗</button>
+                    </div>
+                  </form>
+
+                  <div className="prompt-preview-panel">
+                    <div className="prompt-section-heading">
+                      <span>02</span>
+                      <h3>Live prompt</h3>
+                      <span className="live-indicator">LIVE</span>
+                    </div>
+
+                    <textarea
+                      className="live-prompt-editor"
+                      aria-label="Edit generated prompt"
+                      value={generatedPrompt || livePrompt}
+                      onChange={(event) => setGeneratedPrompt(event.target.value)}
+                      spellCheck="false"
+                    />
+
+                    <div className="prompt-preview-footer">
+                      <span>{(generatedPrompt || livePrompt).length} characters</span>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          navigator.clipboard.writeText(generatedPrompt || livePrompt)
+                        }
+                      >
+                        Copy prompt
+                      </button>
+                    </div>
+                  </div>
+                </>
+              ) : (
+                <form
+                  className="prompt-import-form"
+                  onSubmit={handleSubmit}
+                >
+                  <div className="prompt-section-heading">
+                    <span>01</span>
+                    <h3>Import generated code</h3>
+                  </div>
+
+                  <p className="import-description">
+                    Paste the code returned by your AI. Include the code itself;
+                    Markdown fences are optional.
+                  </p>
+
+                  <div className="editor-field">
+                    <label htmlFor="code-input">Generated code</label>
+                    <textarea
+                      id="code-input"
+                      name="code"
+                      defaultValue={source}
+                      spellCheck="false"
+                      required
+                    />
+                  </div>
+
+                  <div className="prompt-control-footer">
+                    <span>{LANGUAGE_LABELS[language] || language}</span>
+                    <button type="submit">Play message ↗</button>
+                  </div>
+                </form>
+              )}
             </div>
 
-            <div className="editor-field editor-message-field">
-              <label htmlFor="message-input">Original message</label>
-              <textarea
-                id="message-input"
-                name="message"
-                defaultValue={originalMessage}
-                placeholder="Enter the message behind the code..."
-              />
-            </div>
-
-            <div className="composer-actions">
-              <span>
-                {LANGUAGE_LABELS[language] || language}
-                {' · '}
-                {maxLineChars} characters per line
-              </span>
-              <button type="submit">Play message ↗</button>
-            </div>
-          </form>
+          </section>
         </div>
       )}
     </main>
