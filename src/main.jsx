@@ -1,0 +1,521 @@
+import React, { useEffect, useMemo, useState } from 'react';
+import { createRoot } from 'react-dom/client';
+import Prism from 'prismjs';
+import 'prismjs/themes/prism-tomorrow.css';
+import { LANGUAGE_SAMPLES } from './languages/samples.js';
+
+import {
+  detectLanguage,
+  getLanguageModule,
+} from './languages/index.js';
+
+import './styles.css';
+
+const SAMPLE_CODE = `const message = {
+  to: "you",
+  from: "someone who cares",
+  meaning: "I hope life is kind to you.",
+};
+
+// even on the days it isn't.`;
+
+const SAMPLE_MESSAGE =
+  'I hope life is kind to you, even on the days it isn’t.';
+
+const MAX_LINE_CHARS = 100;
+const BASE_TYPING_DELAY = 27;
+const SPEED_OPTIONS = [0.5, 1, 1.5, 2];
+const PREFERENCES_KEY = 'code-message-preferences';
+
+const LANGUAGE_LABELS = {
+  javascript: 'JavaScript',
+  python: 'Python',
+  json: 'JSON',
+};
+
+function wrapSource(source, maxChars = MAX_LINE_CHARS) {
+  return source
+    .split('\n')
+    .flatMap((line) => {
+      if (line.length <= maxChars) return [line];
+
+      const chunks = [];
+      for (let i = 0; i < line.length; i += maxChars) {
+        chunks.push(line.slice(i, i + maxChars));
+      }
+      return chunks;
+    })
+    .join('\n');
+}
+
+function typingDelay(source, index, speed) {
+  const next = source[index];
+
+  if (next === '\n') return 180 / speed;
+  if (/[.!?;]/.test(next || '')) return 115 / speed;
+  if (/[,:[({]/.test(next || '')) return 65 / speed;
+  if (next === ' ') return 12 / speed;
+
+  return BASE_TYPING_DELAY / speed;
+}
+
+function EyeIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      width="17"
+      height="17"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.6"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7Z" />
+      <circle cx="12" cy="12" r="3" />
+    </svg>
+  );
+}
+
+function App() {
+  const [source, setSource] = useState(SAMPLE_CODE);
+  const [originalMessage, setOriginalMessage] = useState(SAMPLE_MESSAGE);
+
+  const [visibleChars, setVisibleChars] = useState(0);
+  const [playing, setPlaying] = useState(true);
+  const [typingStarted, setTypingStarted] = useState(false);
+
+  const [showComposer, setShowComposer] = useState(false);
+  const [showMessage, setShowMessage] = useState(false);
+  const [transitioning, setTransitioning] = useState(false);
+
+  const [speed, setSpeed] = useState(1);
+  const [showSpeedOptions, setShowSpeedOptions] = useState(false);
+  const [showLanguageOptions, setShowLanguageOptions] = useState(false);
+  const [languageOverride, setLanguageOverride] = useState(null);
+  const [preferencesReady, setPreferencesReady] = useState(false);
+  const [reducedMotion, setReducedMotion] = useState(false);
+  const [maxLineChars, setMaxLineChars] = useState(MAX_LINE_CHARS);
+
+  const detectedLanguage = useMemo(() => detectLanguage(source), [source]);
+  const language = languageOverride || detectedLanguage;
+  const languageModule = useMemo(() => getLanguageModule(language), [language]);
+
+  const wrappedSource = useMemo(
+    () => wrapSource(source, maxLineChars),
+    [source, maxLineChars]
+  );
+
+  const lines = wrappedSource.split('\n');
+  const visibleSource = wrappedSource.slice(0, visibleChars);
+  const complete = visibleChars >= wrappedSource.length;
+
+  const highlighted = useMemo(() => {
+    const grammar =
+      languageModule.getGrammar() || Prism.languages.javascript;
+    return Prism.highlight(visibleSource, grammar, language);
+  }, [visibleSource, language, languageModule]);
+
+  // Load saved playback preferences once.
+  useEffect(() => {
+    try {
+      const saved = JSON.parse(localStorage.getItem(PREFERENCES_KEY) || 'null');
+      if (saved && SPEED_OPTIONS.includes(saved.speed)) setSpeed(saved.speed);
+      if (
+        saved &&
+        (saved.languageOverride === null ||
+          Object.hasOwn(LANGUAGE_LABELS, saved.languageOverride))
+      ) {
+        setLanguageOverride(saved.languageOverride);
+      }
+    } catch {
+      // Preferences are optional; defaults remain usable.
+    }
+    setPreferencesReady(true);
+  }, []);
+
+  useEffect(() => {
+    if (!preferencesReady) return;
+    try {
+      localStorage.setItem(
+        PREFERENCES_KEY,
+        JSON.stringify({ speed, languageOverride })
+      );
+    } catch {
+      // Storage can be unavailable in private or restricted contexts.
+    }
+  }, [speed, languageOverride, preferencesReady]);
+
+  // Respect the system's reduced-motion preference.
+  useEffect(() => {
+    const query = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const update = () => setReducedMotion(query.matches);
+    update();
+    query.addEventListener?.('change', update);
+    return () => query.removeEventListener?.('change', update);
+  }, []);
+
+  // Reflow the code into readable lines on narrow screens.
+  useEffect(() => {
+    const updateLineWidth = () => {
+      const availableWidth = Math.max(180, window.innerWidth - 112);
+      const estimatedCharacterWidth = window.innerWidth <= 600 ? 6.2 : 8.4;
+      setMaxLineChars(
+        Math.max(24, Math.min(MAX_LINE_CHARS, Math.floor(availableWidth / estimatedCharacterWidth)))
+      );
+    };
+    updateLineWidth();
+    window.addEventListener('resize', updateLineWidth);
+    return () => window.removeEventListener('resize', updateLineWidth);
+  }, []);
+
+  // Briefly soften the code when the sample changes.
+  useEffect(() => {
+    setTransitioning(true);
+    setVisibleChars(0);
+    setTypingStarted(false);
+    setPlaying(true);
+
+    const timer = window.setTimeout(() => setTransitioning(false), 240);
+    return () => window.clearTimeout(timer);
+  }, [source, maxLineChars]);
+
+  useEffect(() => {
+    if (reducedMotion) {
+      setVisibleChars(wrappedSource.length);
+      setTypingStarted(true);
+      return undefined;
+    }
+    if (typingStarted || !playing) return undefined;
+
+    const timer = window.setTimeout(() => setTypingStarted(true), 650);
+    return () => window.clearTimeout(timer);
+  }, [typingStarted, playing, reducedMotion, wrappedSource.length]);
+
+  useEffect(() => {
+    if (reducedMotion || !typingStarted || !playing || complete) {
+      return undefined;
+    }
+
+    const timer = window.setTimeout(() => {
+      setVisibleChars((current) => Math.min(current + 1, wrappedSource.length));
+    }, typingDelay(wrappedSource, visibleChars, speed));
+
+    return () => window.clearTimeout(timer);
+  }, [
+    typingStarted,
+    playing,
+    complete,
+    visibleChars,
+    wrappedSource,
+    speed,
+    reducedMotion,
+  ]);
+
+  function replay() {
+    if (reducedMotion) {
+      setVisibleChars(wrappedSource.length);
+      setTypingStarted(true);
+      setPlaying(false);
+      return;
+    }
+    setVisibleChars(0);
+    setTypingStarted(false);
+    setPlaying(true);
+  }
+
+  function handleSubmit(event) {
+    event.preventDefault();
+    const form = event.currentTarget;
+    const newCode = form.elements.code.value;
+    const newMessage = form.elements.message.value;
+
+    setSource(newCode);
+    setOriginalMessage(newMessage);
+    setLanguageOverride(null);
+    setShowMessage(false);
+    setShowComposer(false);
+    setShowSpeedOptions(false);
+    setShowLanguageOptions(false);
+  }
+
+  function chooseLanguage(languageId) {
+    setShowLanguageOptions(false);
+
+    if (languageId === null) {
+      setLanguageOverride(null);
+      return;
+    }
+
+    if (languageId !== language) {
+      const sample = LANGUAGE_SAMPLES[languageId];
+      if (sample) {
+        setSource(sample.code);
+        setOriginalMessage(sample.message);
+      }
+    }
+
+    setLanguageOverride(languageId);
+  }
+
+  // Close the small menus when the user clicks anywhere outside them.
+  useEffect(() => {
+    function handleOutsidePointerDown(event) {
+      if (!(event.target instanceof Element)) return;
+      if (event.target.closest('.control-popover')) return;
+      setShowSpeedOptions(false);
+      setShowLanguageOptions(false);
+    }
+
+    document.addEventListener('pointerdown', handleOutsidePointerDown);
+    return () => document.removeEventListener('pointerdown', handleOutsidePointerDown);
+  }, []);
+
+  // Shortcuts: Space = pause/play, R = replay, M = message, E = editor, Esc = close.
+  useEffect(() => {
+    function handleKeyDown(event) {
+      const target = event.target;
+      const isTypingTarget =
+        target instanceof HTMLElement &&
+        (target.isContentEditable ||
+          ['INPUT', 'TEXTAREA', 'SELECT'].includes(target.tagName));
+
+      if (isTypingTarget || event.altKey || event.ctrlKey || event.metaKey) return;
+
+      if (event.key === 'Escape') {
+        setShowMessage(false);
+        setShowComposer(false);
+        setShowSpeedOptions(false);
+        setShowLanguageOptions(false);
+        return;
+      }
+
+      if (event.code === 'Space') {
+        event.preventDefault();
+        setPlaying((current) => !current);
+      } else if (event.key.toLowerCase() === 'r') {
+        replay();
+      } else if (event.key.toLowerCase() === 'm') {
+        setShowMessage((current) => !current);
+      } else if (event.key.toLowerCase() === 'e') {
+        setShowComposer((current) => !current);
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [reducedMotion, wrappedSource.length]);
+
+  return (
+    <main className="stage">
+      <section
+        className={`code-scene${transitioning ? ' is-transitioning' : ''}`}
+        aria-label="Animated code message"
+        style={{ '--code-width': `${maxLineChars}ch` }}
+      >
+        <div className="code-grid" aria-hidden="true">
+          {lines.map((_, index) => (
+            <span
+              key={`${index}-${maxLineChars}`}
+              className="line-number"
+              style={{ animationDelay: `${Math.min(index * 55, 440)}ms` }}
+            >
+              {index + 1}
+            </span>
+          ))}
+        </div>
+
+        <pre className="code-content">
+          <code dangerouslySetInnerHTML={{ __html: highlighted }} />
+          {!complete && !reducedMotion && (
+            <span className="cursor" aria-hidden="true" />
+          )}
+        </pre>
+      </section>
+
+      {showMessage && (
+        <div
+          className="message-overlay"
+          role="presentation"
+          onClick={() => setShowMessage(false)}
+        >
+          <div
+            className="original-message"
+            role="dialog"
+            aria-label="Original message"
+            aria-modal="true"
+            onClick={(event) => event.stopPropagation()}
+          >
+            {originalMessage || 'No original message provided.'}
+            <span className="message-hint">click anywhere outside to close · esc</span>
+          </div>
+        </div>
+      )}
+
+      <div className="quiet-controls" aria-label="Playback controls">
+        <button
+          className="control-button"
+          onClick={() => setPlaying((current) => !current)}
+          data-tooltip={playing ? 'Pause · Space' : 'Play · Space'}
+          aria-label={playing ? 'Pause animation' : 'Resume animation'}
+        >
+          {playing ? 'Ⅱ' : '▶'}
+        </button>
+
+        <button
+          className="control-button"
+          onClick={replay}
+          data-tooltip="Replay · R"
+          aria-label="Replay animation"
+        >
+          ↻
+        </button>
+
+        <div className="control-popover">
+          {showSpeedOptions && (
+            <div className="popover-options speed-options">
+              {SPEED_OPTIONS.map((option) => (
+                <button
+                  key={option}
+                  className={speed === option ? 'option-active' : ''}
+                  onClick={() => {
+                    setSpeed(option);
+                    setShowSpeedOptions(false);
+                  }}
+                  aria-pressed={speed === option}
+                >
+                  {option.toFixed(1)}×
+                </button>
+              ))}
+            </div>
+          )}
+
+          <button
+            className="control-button"
+            onClick={() => {
+              setShowSpeedOptions((current) => !current);
+              setShowLanguageOptions(false);
+            }}
+            data-tooltip="Playback speed"
+            aria-label="Playback speed"
+            aria-expanded={showSpeedOptions}
+          >
+            {speed.toFixed(1)}×
+          </button>
+        </div>
+
+        <div className="control-popover">
+          {showLanguageOptions && (
+            <div className="popover-options language-options">
+              <button
+                className={!languageOverride ? 'option-active' : ''}
+                onClick={() => chooseLanguage(null)}
+              >
+                Auto
+              </button>
+
+              {Object.entries(LANGUAGE_LABELS).map(([id, label]) => (
+                <button
+                  key={id}
+                  className={language === id ? 'option-active' : ''}
+                  onClick={() => chooseLanguage(id)}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          )}
+
+          <button
+            className="control-button language-button"
+            onClick={() => {
+              setShowLanguageOptions((current) => !current);
+              setShowSpeedOptions(false);
+            }}
+            data-tooltip="Choose code language"
+            aria-label={`Code language: ${LANGUAGE_LABELS[language] || language}`}
+            aria-expanded={showLanguageOptions}
+          >
+            <span className="language-dot" />
+            {LANGUAGE_LABELS[language] || language}
+          </button>
+        </div>
+
+        <button
+          className="control-button"
+          onClick={() => setShowMessage(true)}
+          data-tooltip="Original message · M"
+          aria-label="View original message"
+        >
+          <EyeIcon />
+        </button>
+
+        <button
+          className="control-button"
+          onClick={() => setShowComposer((current) => !current)}
+          data-tooltip="Edit code & message · E"
+          data-tooltip-align="right"
+          aria-label="Edit code and message"
+          aria-expanded={showComposer}
+        >
+          {'</>'}
+        </button>
+      </div>
+
+      {showComposer && (
+        <div
+          className="composer-overlay"
+          role="presentation"
+          onClick={() => setShowComposer(false)}
+        >
+          <form
+            className="composer"
+            onSubmit={handleSubmit}
+            role="dialog"
+            aria-label="Edit code and original message"
+            aria-modal="true"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="editor-field editor-code-field">
+              <label htmlFor="code-input">Code</label>
+              <textarea
+                id="code-input"
+                name="code"
+                defaultValue={source}
+                spellCheck="false"
+                autoFocus
+                required
+              />
+            </div>
+
+            <div className="editor-field editor-message-field">
+              <label htmlFor="message-input">Original message</label>
+              <textarea
+                id="message-input"
+                name="message"
+                defaultValue={originalMessage}
+                placeholder="Enter the message behind the code..."
+              />
+            </div>
+
+            <div className="composer-actions">
+              <span>
+                {LANGUAGE_LABELS[language] || language}
+                {' · '}
+                {maxLineChars} characters per line
+              </span>
+              <button type="submit">Play message ↗</button>
+            </div>
+          </form>
+        </div>
+      )}
+    </main>
+  );
+}
+
+createRoot(document.getElementById('root')).render(
+  <React.StrictMode>
+    <App />
+  </React.StrictMode>
+);
