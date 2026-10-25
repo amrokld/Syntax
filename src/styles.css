@@ -1,4 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@300;400&display=swap');
 
 :root {
   color-scheme: dark;
@@ -202,8 +203,9 @@ button {
   }
 
   .brand-word {
-    font-size: 10px;
-    letter-spacing: 0.08em;
+    font-family: 'Manrope', sans-serif;
+    font-weight: 300;
+    letter-spacing: 0.12em;
   }
 
   .brand-line {
@@ -546,8 +548,8 @@ button {
 .code-content {
   width: var(--code-width, 100ch);
   max-width: var(--code-width, 100ch);
-  white-space: pre-wrap;
-  overflow-wrap: anywhere;
+  white-space: pre;
+  overflow-wrap: normal;
   word-break: normal;
   font-size: clamp(12px, 1.05vw, 15px);
   line-height: 1.85;
@@ -958,10 +960,11 @@ button {
 /* Syntax signature */
 .brand-word {
   flex: 0 0 auto;
+  font-family: 'Manrope', sans-serif;
+  font-size: 13px;
+  font-weight: 300;
+  letter-spacing: 0.08em;
   color: #858b95;
-  font-size: 12px;
-  font-weight: 500;
-  letter-spacing: 0.12em;
   white-space: nowrap;
 }
 
@@ -1352,4 +1355,117 @@ button {
 
 .studio-tabs button.active span {
   color: #54d2c8;
+}
+
+/* Stable code layout: each line number shares a row with its code. */
+.code-scene {
+  left: 50%;
+  width: max-content;
+  max-width: calc(100vw - 40px);
+  display: block;
+  grid-template-columns: none;
+}
+
+.code-rows {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-width: 0;
+}
+
+.code-row {
+  display: grid;
+  grid-template-columns: 2.5rem minmax(0, 1fr);
+  column-gap: clamp(0.65rem, 1.4vw, 1rem);
+  align-items: start;
+  min-width: 0;
+}
+
+.code-row .line-number {
+  display: block;
+  padding-top: 0;
+  text-align: right;
+  line-height: 1.85;
+  opacity: 1;
+  animation: none;
+}
+
+.code-row .code-content {
+  width: 100%;
+  min-width: 0;
+  max-width: none;
+  margin: 0;
+  padding: 0;
+  overflow: visible;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  word-break: normal;
+  background: transparent;
+  line-height: 1.85;
+}
+
+.code-row .code-content code {
+  white-space: inherit;
+  overflow-wrap: inherit;
+}
+
+@media (max-width: 600px) {
+  .code-scene {
+    left: 50%;
+    width: calc(100vw - 28px);
+    max-width: calc(100vw - 28px);
+  }
+
+  .code-row {
+    grid-template-columns: 1.8rem minmax(0, 1fr);
+    column-gap: 0.55rem;
+  }
+}
+
+/* Keep the whole code block anchored while characters are typed. */
+.code-scene {
+  left: 50% !important;
+  right: auto !important;
+  width: min(calc(var(--code-width, 100ch) + 4.5rem),
+      calc(100vw - 40px)) !important;
+  max-width: calc(100vw - 40px) !important;
+  display: block !important;
+  transform: translate(-50%, -50%) !important;
+}
+
+.code-rows {
+  width: 100%;
+  min-width: 0;
+}
+
+.code-row {
+  width: 100%;
+  grid-template-columns: 3.5rem minmax(0, 1fr);
+}
+
+.code-row .line-number {
+  width: 3.5rem;
+  text-align: right;
+}
+
+.code-row .code-content {
+  min-width: 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  word-break: normal;
+}
+
+@media (max-width: 600px) {
+  .code-scene {
+    width: calc(100vw - 28px) !important;
+    max-width: calc(100vw - 28px) !important;
+  }
+
+  .code-row {
+    grid-template-columns: 2rem minmax(0, 1fr);
+  }
+
+  .code-row .line-number {
+    width: 2rem;
+  }
 }

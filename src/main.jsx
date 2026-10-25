@@ -182,12 +182,6 @@ function App() {
     [draftMessage, language, promptInstructions]
   );
 
-  const highlighted = useMemo(() => {
-    const grammar =
-      languageModule.getGrammar() || Prism.languages.javascript;
-    return Prism.highlight(visibleSource, grammar, language);
-  }, [visibleSource, language, languageModule]);
-
   // Load saved playback preferences once.
   useEffect(() => {
     try {
@@ -399,24 +393,36 @@ function App() {
         aria-label="Animated code message"
         style={{ '--code-width': `${maxLineChars}ch` }}
       >
-        <div className="code-grid" aria-hidden="true">
-          {lines.map((_, index) => (
-            <span
-              key={`${index}-${maxLineChars}`}
-              className="line-number"
-              style={{ animationDelay: `${Math.min(index * 55, 440)}ms` }}
-            >
-              {index + 1}
-            </span>
-          ))}
-        </div>
+        <div className="code-rows">
+          {lines.map((_, index) => {
+            const lineText = visibleSource.split('\n')[index] ?? '';
+            const grammar =
+              languageModule.getGrammar() || Prism.languages.javascript;
+            const highlightedLine = Prism.highlight(lineText, grammar, language);
+            const isCursorLine =
+              !complete && index === visibleSource.split('\n').length - 1;
 
-        <pre className="code-content">
-          <code dangerouslySetInnerHTML={{ __html: highlighted }} />
-          {!complete && !reducedMotion && (
-            <span className="cursor" aria-hidden="true" />
-          )}
-        </pre>
+            return (
+              <div className="code-row" key={`${index}-${maxLineChars}`}>
+                <span
+                  className="line-number"
+                  aria-hidden="true"
+                  style={{ animationDelay: `${Math.min(index * 55, 440)}ms` }}
+                >
+                  {index + 1}
+                </span>
+                <pre className="code-content">
+                  <code
+                    dangerouslySetInnerHTML={{ __html: highlightedLine || '&nbsp;' }}
+                  />
+                  {isCursorLine && !reducedMotion && (
+                    <span className="cursor" aria-hidden="true" />
+                  )}
+                </pre>
+              </div>
+            );
+          })}
+        </div>
       </section>
 
       {showMessage && (
@@ -621,7 +627,11 @@ function App() {
                         id="message-input"
                         name="message"
                         value={draftMessage}
-                        onChange={(event) => setDraftMessage(event.target.value)}
+                        onChange={(event) => {
+                          const message = event.target.value;
+                          setDraftMessage(message);
+                          setOriginalMessage(message);
+                        }}
                         placeholder="What do you want to express?"
                         required
                       />
