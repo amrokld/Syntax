@@ -1469,3 +1469,37 @@ button {
     width: 2rem;
   }
 }
+
+/* Scrollable code viewport */
+.code-scene {
+  max-height: calc(1.85em * 23);
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: none;
+}
+
+.code-scene::-webkit-scrollbar {
+  display: none;
+}
+
+.code-rows {
+  padding-bottom: 1.85em;
+}
+
+.quiet-controls {
+  isolation: isolate;
+}
+
+.quiet-controls::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  left: -24px;
+  right: -24px;
+  bottom: -12px;
+  height: 100px;
+  pointer-events: none;
+  background: linear-gradient(to bottom,
+      transparent,
+      #17191c 85%);
+}
