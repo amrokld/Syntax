@@ -155,7 +155,8 @@ function App() {
   const [maxLineChars, setMaxLineChars] = useState(MAX_LINE_CHARS);
 
   const detectedLanguage = useMemo(() => detectLanguage(source), [source]);
-  const language = languageOverride || detectedLanguage;
+  const language = detectedLanguage;
+  const promptLanguage = languageOverride || detectedLanguage;
   const languageModule = useMemo(() => getLanguageModule(language), [language]);
 
   const [draftMessage, setDraftMessage] = useState(SAMPLE_MESSAGE);
@@ -171,15 +172,16 @@ function App() {
   const lines = wrappedSource.split('\n');
   const visibleSource = wrappedSource.slice(0, visibleChars);
   const complete = visibleChars >= wrappedSource.length;
+  const visibleLines = visibleSource.split('\n');
 
   const livePrompt = useMemo(
     () =>
       buildPrompt(
         draftMessage,
-        LANGUAGE_LABELS[language] || language,
+        LANGUAGE_LABELS[promptLanguage] || promptLanguage,
         promptInstructions
       ),
-    [draftMessage, language, promptInstructions]
+    [draftMessage, promptLanguage, promptInstructions]
   );
 
   // Load saved playback preferences once.
@@ -380,12 +382,12 @@ function App() {
       >
         <div className="code-rows">
           {lines.map((_, index) => {
-            const lineText = visibleSource.split('\n')[index] ?? '';
+            const lineText = visibleLines[index] ?? '';
             const grammar =
               languageModule.getGrammar() || Prism.languages.javascript;
             const highlightedLine = Prism.highlight(lineText, grammar, language);
             const isCursorLine =
-              !complete && index === visibleSource.split('\n').length - 1;
+              !complete && index === visibleLines.length - 1;
 
             return (
               <div className="code-row" key={`${index}-${maxLineChars}`}>

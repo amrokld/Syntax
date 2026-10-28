@@ -18,8 +18,8 @@ Open the local URL Vite prints in your terminal.
 -   **Pause / resume:** Pause or continue the typing animation.
 -   **Replay:** Restart the animation from the beginning.
 -   **Playback speed:** Adjust how quickly the code appears.
--   **Language:** Switch between JavaScript, Python, and JSON samples,
-    or use automatic language detection.
+-   **Detected Language:** Displays the programming language detected from the current code.
+-   **Imported code:** Import your own code or text and enter the original message it represents.
 -   **Show message:** Reveal the original message behind the code.
 -   **Edit code and message:** Open the editor to customize the code and
     its original message.
@@ -28,9 +28,7 @@ The controls appear subtly when you move the pointer over the page.
 
 ## Supported languages
 
-Syntax currently supports basic JavaScript, Python, and JSON detection
-and highlighting through Prism. Language-specific samples are available
-for switching between the supported languages.
+Syntax supports automatic language detection and syntax highlighting for JavaScript, Python, JSON, TypeScript, C++, Java, Rust, and SQL through Prism.
 
 ## Safety
 
