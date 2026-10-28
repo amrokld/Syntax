@@ -137,6 +137,7 @@ your code here
 function App() {
   const [source, setSource] = useState(SAMPLE_CODE);
   const [originalMessage, setOriginalMessage] = useState(SAMPLE_MESSAGE);
+  const [importedMessage, setImportedMessage] = useState("");
 
   const [visibleChars, setVisibleChars] = useState(0);
   const [playing, setPlaying] = useState(true);
@@ -148,7 +149,6 @@ function App() {
 
   const [speed, setSpeed] = useState(1);
   const [showSpeedOptions, setShowSpeedOptions] = useState(false);
-  const [showLanguageOptions, setShowLanguageOptions] = useState(false);
   const [languageOverride, setLanguageOverride] = useState(null);
   const [preferencesReady, setPreferencesReady] = useState(false);
   const [reducedMotion, setReducedMotion] = useState(false);
@@ -295,35 +295,22 @@ function App() {
     event.preventDefault();
 
     const form = event.currentTarget;
-    const newCode = form.elements.code.value.trim();
+    let newCode = form.elements.code.value.trim();
+
+    const lines = newCode.split("\n");
+    const firstLine = lines[0].trim();
+
+    if (firstLine.startsWith("```") && lines[lines.length - 1].trim() === "```") {
+      newCode = lines.slice(1, -1).join("\n").trim();
+    }
 
     if (!newCode) return;
 
     setSource(newCode);
+    setOriginalMessage(importedMessage.trim());
     setShowMessage(false);
     setShowComposer(false);
     setShowSpeedOptions(false);
-    setShowLanguageOptions(false);
-  }
-
-
-  function chooseLanguage(languageId) {
-    setShowLanguageOptions(false);
-
-    if (languageId === null) {
-      setLanguageOverride(null);
-      return;
-    }
-
-    if (languageId !== language) {
-      const sample = LANGUAGE_SAMPLES[languageId];
-      if (sample) {
-        setSource(sample.code);
-        setOriginalMessage(sample.message);
-      }
-    }
-
-    setLanguageOverride(languageId);
   }
 
   // Close the small menus when the user clicks anywhere outside them.
@@ -332,7 +319,6 @@ function App() {
       if (!(event.target instanceof Element)) return;
       if (event.target.closest('.control-popover')) return;
       setShowSpeedOptions(false);
-      setShowLanguageOptions(false);
     }
 
     document.addEventListener('pointerdown', handleOutsidePointerDown);
@@ -354,7 +340,6 @@ function App() {
         setShowMessage(false);
         setShowComposer(false);
         setShowSpeedOptions(false);
-        setShowLanguageOptions(false);
         return;
       }
 
@@ -490,7 +475,6 @@ function App() {
             className="control-button"
             onClick={() => {
               setShowSpeedOptions((current) => !current);
-              setShowLanguageOptions(false);
             }}
             data-tooltip="Playback speed"
             aria-label="Playback speed"
@@ -501,40 +485,14 @@ function App() {
         </div>
 
         <div className="control-popover">
-          {showLanguageOptions && (
-            <div className="popover-options language-options">
-              <button
-                className={!languageOverride ? 'option-active' : ''}
-                onClick={() => chooseLanguage(null)}
-              >
-                Auto
-              </button>
-
-              {Object.entries(LANGUAGE_LABELS).map(([id, label]) => (
-                <button
-                  key={id}
-                  className={language === id ? 'option-active' : ''}
-                  onClick={() => chooseLanguage(id)}
-                >
-                  {label}
-                </button>
-              ))}
-            </div>
-          )}
-
-          <button
+          <div
             className="control-button language-button"
-            onClick={() => {
-              setShowLanguageOptions((current) => !current);
-              setShowSpeedOptions(false);
-            }}
-            data-tooltip="Choose code language"
-            aria-label={`Code language: ${LANGUAGE_LABELS[language] || language}`}
-            aria-expanded={showLanguageOptions}
+            data-tooltip="Detected code language"
+            aria-label={`Detected code language: ${LANGUAGE_LABELS[language] || language}`}
           >
             <span className="language-dot" />
             {LANGUAGE_LABELS[language] || language}
-          </button>
+          </div>
         </div>
 
         <button
@@ -722,6 +680,18 @@ function App() {
                       name="code"
                       defaultValue={source}
                       spellCheck="false"
+                      required
+                    />
+                  </div>
+
+                  <div className="editor-field">
+                    <label htmlFor="imported-message">Original message</label>
+                    <textarea
+                      id="imported-message"
+                      name="originalMessage"
+                      value={importedMessage}
+                      onChange={(event) => setImportedMessage(event.target.value)}
+                      placeholder="Enter the message this code represents..."
                       required
                     />
                   </div>
