@@ -2,7 +2,6 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import Prism from 'prismjs';
 import 'prismjs/themes/prism-tomorrow.css';
-import { LANGUAGE_SAMPLES } from './languages/samples.js';
 
 import {
   detectLanguage,
@@ -137,7 +136,6 @@ your code here
 function App() {
   const [source, setSource] = useState(SAMPLE_CODE);
   const [originalMessage, setOriginalMessage] = useState(SAMPLE_MESSAGE);
-  const [importedMessage, setImportedMessage] = useState("");
 
   const [visibleChars, setVisibleChars] = useState(0);
   const [playing, setPlaying] = useState(true);
@@ -309,7 +307,7 @@ function App() {
     if (!newCode) return;
 
     setSource(newCode);
-    setOriginalMessage(importedMessage.trim());
+    setOriginalMessage(draftMessage.trim());
     setShowMessage(false);
     setShowComposer(false);
     setShowSpeedOptions(false);
@@ -661,41 +659,50 @@ function App() {
                   </div>
                 </>
               ) : (
+
                 <form
                   className="prompt-import-form"
                   onSubmit={handleSubmit}
                 >
-                  <div className="prompt-section-heading">
-                    <span>01</span>
-                    <h3>Import generated code</h3>
-                  </div>
 
-                  <p className="import-description">
-                    Paste the code returned by your AI. Include the code itself;
-                    Markdown fences are optional.
-                  </p>
+                  <div className="prompt-import-layout">
+                    <div className="prompt-controls">
+                      <div className="prompt-section-heading">
+                        <span>01</span>
+                        <h3>Import generated code</h3>
+                      </div>
 
-                  <div className="editor-field">
-                    <label htmlFor="code-input">Generated code</label>
-                    <textarea
-                      id="code-input"
-                      name="code"
-                      defaultValue={source}
-                      spellCheck="false"
-                      required
-                    />
-                  </div>
+                      <div className="editor-field">
+                        <label htmlFor="imported-message">Original message</label>
+                        <textarea
+                          id="imported-message"
+                          name="originalMessage"
+                          value={draftMessage}
+                          onChange={(event) => {
+                            const message = event.target.value;
+                            setDraftMessage(message);
+                            setOriginalMessage(message);
+                          }}
+                          placeholder="Enter the message this code represents..."
+                          required
+                        />
+                      </div>
+                    </div>
 
-                  <div className="editor-field">
-                    <label htmlFor="imported-message">Original message</label>
-                    <textarea
-                      id="imported-message"
-                      name="originalMessage"
-                      value={importedMessage}
-                      onChange={(event) => setImportedMessage(event.target.value)}
-                      placeholder="Enter the message this code represents..."
-                      required
-                    />
+                    <div className="prompt-preview-panel">
+                      <div className="prompt-section-heading">
+                        <span>02</span>
+                        <h3>Generated code</h3>
+                      </div>
+
+                      <textarea
+                        id="code-input"
+                        name="code"
+                        defaultValue={source}
+                        spellCheck="false"
+                        required
+                      />
+                    </div>
                   </div>
 
                   <div className="prompt-control-footer">
