@@ -1,0 +1,265 @@
+/* Polish pass: quieter contrast, responsive code width, and clearer focus states. */
+
+.stage {
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.code-scene {
+  left: 50%;
+  grid-template-columns: 3.5rem var(--code-width, 100ch);
+  column-gap: clamp(0.7rem, 1.5vw, 1.15rem);
+  max-width: calc(100vw - 28px);
+  transition: opacity 220ms ease, filter 220ms ease;
+}
+
+.code-scene.is-transitioning {
+  opacity: 0.35;
+  filter: blur(1px);
+}
+
+.code-grid {
+  color: var(--muted);
+}
+
+.line-number {
+  color: #555d67;
+  transition: color 180ms ease;
+}
+
+.code-content {
+  width: var(--code-width, 100ch);
+  max-width: var(--code-width, 100ch);
+  white-space: pre;
+  overflow-wrap: normal;
+  word-break: normal;
+  font-size: clamp(12px, 1.05vw, 15px);
+  line-height: 1.85;
+  letter-spacing: -0.025em;
+}
+
+.token.comment {
+  color: #77838d;
+}
+
+.token.keyword,
+.token.operator {
+  color: #c6a0f6;
+}
+
+.token.string {
+  color: #a8dba0;
+}
+
+.token.function,
+.token.property {
+  color: #8bb8ff;
+}
+
+.token.punctuation {
+  color: #aeb7c2;
+}
+
+.cursor {
+  background: var(--accent);
+  box-shadow: 0 0 8px rgb(84 210 200 / 22%);
+}
+
+.control-button {
+  border-radius: 6px;
+  transition:
+    color 180ms ease,
+    background 180ms ease,
+    transform 180ms ease;
+}
+
+.control-button:hover,
+.control-button[aria-expanded='true'] {
+  color: #e4e9ee;
+  background: #252a2f;
+}
+
+.control-button:active {
+  transform: scale(0.94);
+}
+
+.control-button:focus-visible,
+.popover-options button:focus-visible,
+.composer button:focus-visible,
+.composer textarea:focus-visible {
+  outline: 1px solid var(--accent);
+  outline-offset: 3px;
+}
+
+.language-dot {
+  background: var(--accent);
+  box-shadow: 0 0 8px rgb(84 210 200 / 20%);
+}
+
+.popover-options {
+  gap: 13px;
+  padding: 8px 11px;
+  border: 1px solid rgb(255 255 255 / 5%);
+  border-radius: 8px;
+  background: rgb(29 32 36 / 96%);
+  box-shadow: 0 10px 32px rgb(0 0 0 / 20%);
+  backdrop-filter: blur(12px);
+}
+
+.popover-options button {
+  border-radius: 4px;
+  padding: 5px 3px;
+}
+
+.popover-options button.option-active {
+  color: var(--accent);
+}
+
+.message-overlay {
+  background: rgb(10 12 14 / 82%);
+  backdrop-filter: blur(8px);
+}
+
+.original-message {
+  padding: 24px;
+  animation: message-in 300ms cubic-bezier(.2, .75, .25, 1) both;
+}
+
+.message-hint {
+  display: block;
+  margin-top: 24px;
+  color: #68717b;
+  font-family: 'SFMono-Regular', Consolas, monospace;
+  font-size: 10px;
+  letter-spacing: 0.015em;
+  opacity: 0;
+  transition: opacity 180ms ease;
+}
+
+.message-overlay:hover .message-hint {
+  opacity: 1;
+}
+
+.composer {
+  border-color: #343a40;
+  border-radius: 10px;
+  background: rgb(29 32 36 / 97%);
+  backdrop-filter: blur(18px);
+}
+
+.composer textarea {
+  border-color: #30363d;
+  transition: border-color 160ms ease, background 160ms ease;
+}
+
+.composer textarea:focus {
+  border-color: rgb(84 210 200 / 65%);
+  background: #191c20;
+}
+
+.composer-actions button {
+  background: var(--accent);
+  transition: background 160ms ease, transform 160ms ease;
+}
+
+.composer-actions button:hover {
+  background: #7ce1d8;
+}
+
+.composer-actions button:active {
+  transform: translateY(1px);
+}
+
+@media (max-width: 600px) {
+  .code-scene {
+    left: 50%;
+    grid-template-columns: 2rem var(--code-width, 34ch);
+    column-gap: 0.6rem;
+    max-width: calc(100vw - 20px);
+  }
+
+  .code-content,
+  .code-grid {
+    font-size: 10px;
+    line-height: 1.85;
+  }
+
+  .code-content {
+    letter-spacing: -0.025em;
+  }
+
+  .quiet-controls {
+    right: 8px;
+    bottom: max(8px, env(safe-area-inset-bottom));
+    left: 8px;
+    justify-content: center;
+    gap: 3px;
+    opacity: 0.96;
+  }
+
+  .control-button {
+    min-width: 32px;
+    height: 34px;
+    padding: 0 6px;
+  }
+
+  .language-button {
+    max-width: 118px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .popover-options {
+    gap: 9px;
+    max-width: calc(100vw - 24px);
+  }
+
+  .message-overlay {
+    padding: 20px;
+  }
+
+  .original-message {
+    padding: 12px;
+    font-size: clamp(19px, 5vw, 24px);
+  }
+
+  .message-hint {
+    opacity: 1;
+  }
+
+  .composer {
+    bottom: calc(54px + env(safe-area-inset-bottom));
+    max-height: calc(100dvh - 84px);
+  }
+
+  .composer-actions {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+
+/* Tooltip stays fully inside the viewport for the rightmost control. */
+.control-button[data-tooltip-align='right']::after {
+  left: auto;
+  right: 0;
+  transform: translateY(3px);
+}
+
+.control-button[data-tooltip-align='right']:hover::after,
+.control-button[data-tooltip-align='right']:focus-visible::after {
+  transform: translateY(0);
+}
+

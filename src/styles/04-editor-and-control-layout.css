@@ -1,0 +1,237 @@
+/* Centered, glassy editor overlay, visually related to the message reveal. */
+.composer-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 35;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(18px, 4vw, 48px);
+  overflow-y: auto;
+  background: rgb(10 12 14 / 58%);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  animation: overlay-in 200ms ease both;
+}
+
+.composer {
+  position: relative;
+  inset: auto;
+  left: auto;
+  bottom: auto;
+  transform: none;
+  width: min(880px, 100%);
+  max-height: min(86dvh, 900px);
+  overflow-y: auto;
+  display: grid;
+  gap: clamp(24px, 3.5vh, 38px);
+  padding: 16px 0 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  animation: message-in 260ms cubic-bezier(.2, .75, .25, 1) both;
+}
+
+.editor-field {
+  position: relative;
+  padding-top: 10px;
+}
+
+.editor-field label {
+  position: absolute;
+  z-index: 1;
+  top: 0;
+  left: 18px;
+  padding: 0 7px;
+  color: #9aa5af;
+  background: #171a1e;
+  font-size: 11px;
+  line-height: 1.2;
+  letter-spacing: 0.035em;
+  text-transform: uppercase;
+  pointer-events: none;
+}
+
+.editor-field textarea {
+  display: block;
+  width: 100%;
+  min-height: 0;
+  resize: vertical;
+  padding: 22px 20px 18px;
+  border: 1px solid rgb(255 255 255 / 8%);
+  border-radius: 10px;
+  background: rgb(25 28 32 / 94%);
+  color: #d4dbe2;
+  box-shadow: 0 18px 50px rgb(0 0 0 / 28%), inset 0 1px 0 rgb(255 255 255 / 2%);
+  outline: none;
+  font-size: 13px;
+  line-height: 1.8;
+  transition: border-color 180ms ease, box-shadow 180ms ease, background 180ms ease;
+}
+
+.editor-code-field textarea {
+  height: min(42vh, 390px);
+  min-height: 180px;
+}
+
+.editor-message-field textarea {
+  height: 132px;
+  min-height: 90px;
+  font-family: system-ui, sans-serif;
+  font-size: 15px;
+  line-height: 1.7;
+}
+
+.editor-field textarea:focus {
+  border-color: rgb(84 210 200 / 52%);
+  background: rgb(27 31 35 / 98%);
+  box-shadow: 0 18px 50px rgb(0 0 0 / 32%), 0 0 0 3px rgb(84 210 200 / 6%);
+}
+
+.composer-actions {
+  padding: 0 2px 2px;
+}
+
+.composer-actions span {
+  font-size: 11px;
+}
+
+.composer-actions button {
+  padding: 10px 14px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+@media (max-width: 600px) {
+  .composer-overlay {
+    align-items: center;
+    padding: 18px 14px calc(66px + env(safe-area-inset-bottom));
+  }
+
+  .composer {
+    width: 100%;
+    max-height: calc(100dvh - 96px - env(safe-area-inset-bottom));
+    gap: 24px;
+    padding-top: 12px;
+  }
+
+  .editor-code-field textarea {
+    height: 34dvh;
+    min-height: 150px;
+  }
+
+  .editor-message-field textarea {
+    height: 112px;
+  }
+
+  .editor-field textarea {
+    padding: 20px 14px 14px;
+    font-size: 12px;
+  }
+
+  .composer-actions {
+    align-items: center;
+    flex-direction: row;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+  .composer-overlay,
+  .composer {
+    animation: none;
+  }
+}
+
+/* Vertical language menu */
+.language-options {
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+  gap: 2px;
+
+  width: 150px;
+  max-height: min(55vh, 360px);
+  overflow-y: auto;
+}
+
+.language-options button {
+  width: 100%;
+  padding: 8px 10px;
+  text-align: left;
+  border-radius: 5px;
+}
+
+/* Subtle scrollbar */
+.language-options {
+  scrollbar-width: thin;
+  scrollbar-color: #454b52 transparent;
+}
+
+/* Syntax signature */
+.brand-word {
+  flex: 0 0 auto;
+  font-family: 'Manrope', sans-serif;
+  font-size: 13px;
+  font-weight: 300;
+  letter-spacing: 0.08em;
+  color: #858b95;
+  white-space: nowrap;
+}
+
+.brand-line {
+  flex: 1 1 0;
+  min-width: 12px;
+  height: 1px;
+  background: #454950;
+  margin-right: 4px;
+}
+
+.stage:hover .brand-word {
+  color: #a7adb7;
+}
+
+/* Final Syntax control-bar layout */
+.quiet-controls {
+  position: fixed !important;
+  left: 50% !important;
+  right: auto !important;
+  bottom: 28px !important;
+  width: min(700px, calc(100vw - 40px)) !important;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  flex-wrap: nowrap;
+  gap: 6px;
+}
+
+/* The connector fills only the available space */
+.brand-line {
+  flex: 1 1 0;
+  min-width: 12px;
+  max-width: none;
+  height: 1px;
+  margin-right: 4px;
+  background: #454950;
+}
+
+/* Keep the signature understated */
+.brand-word {
+  flex: 0 0 auto;
+  color: #858b95;
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  white-space: nowrap;
+}
+
+@media (max-width: 600px) {
+  .quiet-controls {
+    bottom: max(16px, env(safe-area-inset-bottom)) !important;
+    width: calc(100vw - 24px) !important;
+    gap: 2px;
+  }
+
+}
+

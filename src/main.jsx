@@ -9,7 +9,7 @@ import {
   getLanguageModule,
 } from './languages/index.js';
 
-import './styles.css';
+import './style.css';
 
 const SAMPLE_CODE = `const message = {
   to: "you",
