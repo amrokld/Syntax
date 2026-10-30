@@ -144,13 +144,13 @@
   from {
     opacity: 0;
     transform: translateY(5px);
-    filter: blue(4px);
+    filter: blur(4px);
   }
 
   to {
     opacity: 1;
     transform: translateY(0);
-    filter: blue(0);
+    filter: blur(0);
   }
 }
 
@@ -197,4 +197,3 @@
     scroll-behavior: auto !important;
   }
 }
-

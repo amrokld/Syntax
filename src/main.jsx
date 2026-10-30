@@ -158,6 +158,7 @@ function App() {
   const languageModule = useMemo(() => getLanguageModule(language), [language]);
 
   const [draftMessage, setDraftMessage] = useState(SAMPLE_MESSAGE);
+  const [importedCode, setImportedCode] = useState(SAMPLE_CODE);
   const [promptInstructions, setPromptInstructions] = useState('');
   const [generatedPrompt, setGeneratedPrompt] = useState('');
   const [editorMode, setEditorMode] = useState('prompt');
@@ -307,6 +308,7 @@ function App() {
     if (!newCode) return;
 
     setSource(newCode);
+    setImportedCode(newCode);
     setOriginalMessage(draftMessage.trim());
     setShowMessage(false);
     setShowComposer(false);
@@ -498,8 +500,8 @@ function App() {
         <button
           className="control-button"
           onClick={() => setShowMessage(true)}
-          data-tooltip="Edit original message · M"
-          aria-label="Edit original message"
+          data-tooltip="Show original message · M"
+          aria-label="Show original message"
         >
           <EyeIcon />
         </button>
@@ -698,7 +700,8 @@ function App() {
                       <textarea
                         id="code-input"
                         name="code"
-                        defaultValue={source}
+                        value={importedCode}
+                        onChange={(event) => setImportedCode(event.target.value)}
                         spellCheck="false"
                         required
                       />

@@ -19,18 +19,20 @@ export const languages = {
 };
 
 export function detectLanguage(source) {
-    // Check JSON first because valid JSON can contain
-    // text that resembles other programming languages.
+    // Structured formats first.
     if (json.detect(source)) return json.id;
-    if (python.detect(source)) return python.id;
-    if (javascript.detect(source)) return javascript.id;
-    if (typescript.detect(source)) return typescript.id;
+
+    // Languages with distinctive syntax.
     if (cpp.detect(source)) return cpp.id;
     if (java.detect(source)) return java.id;
     if (rust.detect(source)) return rust.id;
+    if (typescript.detect(source)) return typescript.id;
     if (sql.detect(source)) return sql.id;
+    if (python.detect(source)) return python.id;
 
-    // Safe default when detection is uncertain.
+    // JavaScript is the fallback.
+    if (javascript.detect(source)) return javascript.id;
+
     return javascript.id;
 }
 
