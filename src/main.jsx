@@ -331,12 +331,13 @@ function App() {
   useEffect(() => {
     function handleKeyDown(event) {
       const target = event.target;
-      const isTypingTarget =
+      const isInteractiveTarget =
         target instanceof HTMLElement &&
         (target.isContentEditable ||
-          ['INPUT', 'TEXTAREA', 'SELECT'].includes(target.tagName));
+          ['INPUT', 'TEXTAREA', 'SELECT', 'BUTTON', 'A'].includes(target.tagName) ||
+          target.getAttribute('role') === 'button');
 
-      if (isTypingTarget || event.altKey || event.ctrlKey || event.metaKey) return;
+      if (isInteractiveTarget || event.altKey || event.ctrlKey || event.metaKey) return;
 
       if (event.key === 'Escape') {
         setShowMessage(false);
@@ -381,34 +382,37 @@ function App() {
         style={{ '--code-width': `${maxLineChars}ch` }}
       >
         <div className="code-rows">
-          {lines.map((_, index) => {
-            const lineText = visibleLines[index] ?? '';
+          {(() => {
             const grammar =
               languageModule.getGrammar() || Prism.languages.javascript;
-            const highlightedLine = Prism.highlight(lineText, grammar, language);
-            const isCursorLine =
-              !complete && index === visibleLines.length - 1;
 
-            return (
-              <div className="code-row" key={`${index}-${maxLineChars}`}>
-                <span
-                  className="line-number"
-                  aria-hidden="true"
-                  style={{ animationDelay: `${Math.min(index * 55, 440)}ms` }}
-                >
-                  {index + 1}
-                </span>
-                <pre className="code-content">
-                  <code
-                    dangerouslySetInnerHTML={{ __html: highlightedLine || '&nbsp;' }}
-                  />
-                  {isCursorLine && !reducedMotion && (
-                    <span className="cursor" aria-hidden="true" />
-                  )}
-                </pre>
-              </div>
-            );
-          })}
+            return lines.map((_, index) => {
+              const lineText = visibleLines[index] ?? '';
+              const highlightedLine = Prism.highlight(lineText, grammar, language);
+              const isCursorLine =
+                !complete && index === visibleLines.length - 1;
+
+              return (
+                <div className="code-row" key={`${index}-${maxLineChars}`}>
+                  <span
+                    className="line-number"
+                    aria-hidden="true"
+                    style={{ animationDelay: `${Math.min(index * 55, 440)}ms` }}
+                  >
+                    {index + 1}
+                  </span>
+                  <pre className="code-content">
+                    <code
+                      dangerouslySetInnerHTML={{ __html: highlightedLine || '&nbsp;' }}
+                    />
+                    {isCursorLine && !reducedMotion && (
+                      <span className="cursor" aria-hidden="true" />
+                    )}
+                  </pre>
+                </div>
+              );
+            })
+          })()}
         </div>
       </section>
 
@@ -431,7 +435,11 @@ function App() {
         </div>
       )}
 
-      <div className="quiet-controls" aria-label="Playback controls">
+      <div
+        className="quiet-controls"
+        role="group"
+        aria-label="Playback controls"
+      >
         <span className="brand-word">Syntax</span>
 
         <span className="brand-line" aria-hidden="true" />
@@ -591,6 +599,7 @@ function App() {
                           const message = event.target.value;
                           setDraftMessage(message);
                           setOriginalMessage(message);
+                          setGeneratedPrompt('');
                         }}
                         placeholder="What do you want to express?"
                         required
@@ -605,6 +614,7 @@ function App() {
                         onChange={(event) => {
                           const selected = event.target.value;
                           setLanguageOverride(selected === 'auto' ? null : selected);
+                          setGeneratedPrompt('');
                         }}
                       >
                         <option value="auto">Auto detect</option>
@@ -621,7 +631,10 @@ function App() {
                       <textarea
                         id="instructions-input"
                         value={promptInstructions}
-                        onChange={(event) => setPromptInstructions(event.target.value)}
+                        onChange={(event) => {
+                          setPromptInstructions(event.target.value);
+                          setGeneratedPrompt('');
+                        }}
                         placeholder="Poetic, minimalist, recursive, dark..."
                       />
                     </div>
@@ -709,7 +722,7 @@ function App() {
                   </div>
 
                   <div className="prompt-control-footer">
-                    <span>{LANGUAGE_LABELS[language] || language}</span>
+                    <span>{LANGUAGE_LABELS[promptLanguage] || promptLanguage}</span>
                     <button type="submit">Play message ↗</button>
                   </div>
                 </form>
