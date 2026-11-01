@@ -1,35 +1,95 @@
 # Syntax
 
-An interactive experience that turns personal messages into code. Watch
-them unfold character by character, explore different programming
-languages, and discover the meaning hidden behind the syntax.
+**Turn personal messages into code.**
 
-## Run locally
+Syntax is an interactive experience that transforms personal messages into animated code, revealing it one character at a time.
 
-``` bash
-npm install
-npm run dev
-```
+Explore different programming languages, customize the code, and discover the message hidden behind the syntax.
 
-Open the local URL Vite prints in your terminal.
+![Syntax application screenshot](docs/screenshot.png)
 
-## Controls
+## Features
 
--   **Pause / resume:** Pause or continue the typing animation.
--   **Replay:** Restart the animation from the beginning.
--   **Playback speed:** Adjust how quickly the code appears.
--   **Detected Language:** Displays the programming language detected from the current code.
--   **Imported code:** Import your own code or text and enter the original message it represents.
--   **Show message:** Reveal the original message behind the code.
--   **Edit code and message:** Open the editor to customize the code and
-    its original message.
-
-The controls appear subtly when you move the pointer over the page.
+- **Animated code reveal** — Watch code unfold character by character.
+- **Playback controls** — Pause, resume, replay, and adjust animation speed.
+- **Automatic language detection** — Detect the programming language from the current code.
+- **Multiple languages** — Syntax highlighting for eight programming languages.
+- **Import your own code** — Import existing code and provide the original message behind it.
+- **Prompt Studio** — Prepare prompts and customize code-generation instructions.
+- **Message reveal** — Reveal the original message associated with the code.
+- **Code editor** — Edit the code and its original message.
 
 ## Supported languages
 
-Syntax supports automatic language detection and syntax highlighting for JavaScript, Python, JSON, TypeScript, C++, Java, Rust, and SQL through Prism.
+| Language | Support |
+|---|---|
+| JavaScript | Syntax highlighting |
+| Python | Syntax highlighting |
+| JSON | Syntax highlighting |
+| TypeScript | Syntax highlighting |
+| C++ | Syntax highlighting |
+| Java | Syntax highlighting |
+| Rust | Syntax highlighting |
+| SQL | Syntax highlighting |
+
+Language highlighting is powered by [Prism.js](https://prismjs.com/).
+
+## Getting started
+
+### Requirements
+
+- Node.js
+- npm
+
+### Installation
+
+Clone the repository:
+
+```bash
+git clone https://github.com/amroklld/Syntax.git
+cd Syntax
+```
+
+Install dependencies:
+
+```bash
+npm install
+```
+
+Start the development server:
+
+```bash
+npm run dev
+```
+
+Open the local URL provided by Vite in your browser.
+
+### Production build
+
+Build the application:
+
+```bash
+npm run build
+```
+
+Preview the production build locally:
+
+```bash
+npm run preview
+```
 
 ## Safety
 
-The code is displayed, never executed.
+Syntax displays code as text. Imported or generated code is **never executed**.
+
+## Built with
+
+- React
+- Vite
+- Prism.js
+- JavaScript
+- CSS
+
+---
+
+**Syntax** — Messages expressed through code.
