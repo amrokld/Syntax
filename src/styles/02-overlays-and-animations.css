@@ -197,3 +197,143 @@
     scroll-behavior: auto !important;
   }
 }
+
+
+/* First-visit welcome experience */
+.welcome-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgb(10 12 14 / 72%);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  animation: overlay-in 200ms ease both;
+}
+
+.welcome-modal {
+  width: min(520px, 100%);
+  padding: clamp(26px, 5vw, 42px);
+  border: 1px solid #30363d;
+  border-radius: 14px;
+  background: #16191d;
+  color: #dce2e8;
+  box-shadow: 0 28px 100px rgb(0 0 0 / 45%);
+  animation: message-in 260ms cubic-bezier(.2, .75, .25, 1) both;
+}
+
+.welcome-eyebrow {
+  color: var(--accent);
+  font-size: 10px;
+  letter-spacing: .16em;
+}
+
+.welcome-modal h2 {
+  margin: 18px 0 12px;
+  font-size: clamp(25px, 4vw, 34px);
+  line-height: 1.2;
+  letter-spacing: -.045em;
+  font-weight: 550;
+}
+
+.welcome-description {
+  margin: 0;
+  color: #929ca7;
+  font-size: 13px;
+  line-height: 1.8;
+}
+
+.welcome-guide {
+  display: grid;
+  gap: 15px;
+  margin: 28px 0;
+  padding: 20px;
+  border: 1px solid #2c333a;
+  border-radius: 9px;
+  background: #1b1f23;
+}
+
+.welcome-guide h3 {
+  margin: 0 0 3px;
+  color: #e3e8ed;
+  font-size: 12px;
+  font-weight: 550;
+}
+
+.welcome-guide-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.welcome-guide-item>span {
+  flex: 0 0 42px;
+  color: var(--accent);
+  font-size: 12px;
+  text-align: center;
+}
+
+.welcome-guide-item p {
+  margin: 0;
+  color: #a2acb6;
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.welcome-start {
+  width: 100%;
+  padding: 12px 16px;
+  border: 0;
+  border-radius: 7px;
+  background: var(--accent);
+  color: #111719;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 650;
+  cursor: pointer;
+  transition: background 150ms ease, transform 150ms ease;
+}
+
+.welcome-start:hover {
+  background: #7ce1d8;
+}
+
+.welcome-start:active {
+  transform: translateY(1px);
+}
+
+.welcome-note {
+  display: block;
+  margin-top: 14px;
+  color: #69737e;
+  font-size: 10px;
+  text-align: center;
+}
+
+@media (max-width: 480px) {
+  .welcome-overlay {
+    padding: 16px;
+  }
+
+  .welcome-guide {
+    gap: 13px;
+    margin: 22px 0;
+    padding: 16px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+  .welcome-overlay,
+  .welcome-modal {
+    animation: none;
+  }
+}
+
+.welcome-guide-item>span {
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}
