@@ -6,6 +6,15 @@ import * as cpp from './cpp.js';
 import * as java from './java.js';
 import * as rust from './rust.js';
 import * as sql from './sql.js';
+import * as go from './go.js';
+import * as c from './c.js';
+import * as csharp from './csharp.js';
+import * as php from './php.js';
+import * as ruby from './ruby.js';
+import * as swift from './swift.js';
+import * as kotlin from './kotlin.js';
+import * as bash from './bash.js';
+import * as html from './markup.js';
 
 export const languages = {
     javascript,
@@ -16,18 +25,39 @@ export const languages = {
     java,
     rust,
     sql,
+    go,
+    c,
+    csharp,
+    php,
+    ruby,
+    swift,
+    kotlin,
+    bash,
+    html,
 };
+
 
 export function detectLanguage(source) {
     // Structured formats first.
     if (json.detect(source)) return json.id;
+    if (html.detect(source)) return html.id;
 
-    // Languages with distinctive syntax.
-    if (cpp.detect(source)) return cpp.id;
-    if (java.detect(source)) return java.id;
-    if (rust.detect(source)) return rust.id;
-    if (typescript.detect(source)) return typescript.id;
+    // Languages with more distinctive syntax.
+    if (bash.detect(source)) return bash.id;
+    if (php.detect(source)) return php.id;
+    if (csharp.detect(source)) return csharp.id;
+    if (kotlin.detect(source)) return kotlin.id;
+    if (swift.detect(source)) return swift.id;
+    if (ruby.detect(source)) return ruby.id;
     if (sql.detect(source)) return sql.id;
+
+    // C-family and systems languages.
+    if (cpp.detect(source)) return cpp.id;
+    if (go.detect(source)) return go.id;
+    if (rust.detect(source)) return rust.id;
+    if (c.detect(source)) return c.id;
+    if (java.detect(source)) return java.id;
+    if (typescript.detect(source)) return typescript.id;
     if (python.detect(source)) return python.id;
 
     // JavaScript is the fallback.
@@ -35,6 +65,7 @@ export function detectLanguage(source) {
 
     return javascript.id;
 }
+
 
 export function getLanguageModule(languageId) {
     return languages[languageId] || languages.javascript;

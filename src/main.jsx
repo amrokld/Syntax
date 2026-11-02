@@ -35,6 +35,15 @@ const LANGUAGE_LABELS = {
   cpp: 'C++',
   java: 'Java',
   rust: 'Rust',
+  go: 'Go',
+  c: 'C',
+  csharp: 'C#',
+  php: 'PHP',
+  ruby: 'Ruby',
+  swift: 'Swift',
+  kotlin: 'Kotlin',
+  bash: 'Bash',
+  html: 'HTML',
   sql: 'SQL',
 };
 
@@ -167,6 +176,7 @@ function App() {
   const [generatedPrompt, setGeneratedPrompt] = useState('');
   const [editorMode, setEditorMode] = useState('prompt');
   const [copyStatus, setCopyStatus] = useState('idle');
+  const [showLanguageOptions, setShowLanguageOptions] = useState(false);
 
   const wrappedSource = useMemo(
     () => wrapSource(source, maxLineChars),
@@ -333,16 +343,16 @@ function App() {
   }
 
   // Close the small menus when the user clicks anywhere outside them.
-  useEffect(() => {
-    function handleOutsidePointerDown(event) {
-      if (!(event.target instanceof Element)) return;
-      if (event.target.closest('.control-popover')) return;
-      setShowSpeedOptions(false);
-    }
+  function handleOutsidePointerDown(event) {
+    if (!(event.target instanceof Element)) return;
+    if (event.target.closest('.control-popover')) return;
 
-    document.addEventListener('pointerdown', handleOutsidePointerDown);
-    return () => document.removeEventListener('pointerdown', handleOutsidePointerDown);
-  }, []);
+    setShowSpeedOptions(false);
+
+    if (!event.target.closest('.language-select')) {
+      setShowLanguageOptions(false);
+    }
+  }
 
   // Shortcuts: Space = pause/play, R = replay, M = message, E = editor, Esc = close.
   useEffect(() => {
@@ -655,23 +665,61 @@ function App() {
                       />
                     </div>
 
+
                     <div className="editor-field">
-                      <label htmlFor="language-select">Language</label>
-                      <select
-                        id="language-select"
-                        value={languageOverride || 'auto'}
-                        onChange={(event) => {
-                          const selected = event.target.value;
-                          setLanguageOverride(selected === 'auto' ? null : selected);
-                          setGeneratedPrompt('');
-                        }}
-                      >
-                        <option value="auto">Auto detect</option>
-                        {Object.entries(LANGUAGE_LABELS).map(([id, label]) => (
-                          <option key={id} value={id}>{label}</option>
-                        ))}
-                      </select>
+                      <label>Language</label>
+
+                      <div className="language-select">
+                        <button
+                          type="button"
+                          className="language-select-trigger"
+                          onClick={() => setShowLanguageOptions((current) => !current)}
+                          aria-haspopup="listbox"
+                          aria-expanded={showLanguageOptions}
+                        >
+                          <span>
+                            {LANGUAGE_LABELS[languageOverride] || 'Auto detect'}
+                          </span>
+                          <span className="language-select-arrow">▾</span>
+                        </button>
+
+                        {showLanguageOptions && (
+                          <div className="language-options" role="listbox">
+                            <button
+                              type="button"
+                              role="option"
+                              aria-selected={languageOverride === null}
+                              className={languageOverride === null ? 'selected' : ''}
+                              onClick={() => {
+                                setLanguageOverride(null);
+                                setGeneratedPrompt('');
+                                setShowLanguageOptions(false);
+                              }}
+                            >
+                              Auto detect
+                            </button>
+
+                            {Object.entries(LANGUAGE_LABELS).map(([id, label]) => (
+                              <button
+                                type="button"
+                                role="option"
+                                aria-selected={languageOverride === id}
+                                className={languageOverride === id ? 'selected' : ''}
+                                key={id}
+                                onClick={() => {
+                                  setLanguageOverride(id);
+                                  setGeneratedPrompt('');
+                                  setShowLanguageOptions(false);
+                                }}
+                              >
+                                {label}
+                              </button>
+                            ))}
+                          </div>
+                        )}
+                      </div>
                     </div>
+
 
                     <div className="editor-field">
                       <label htmlFor="instructions-input">

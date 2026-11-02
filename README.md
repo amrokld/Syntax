@@ -19,18 +19,19 @@ Explore different programming languages, customize the code, and discover the me
 - **Message reveal** — Reveal the original message associated with the code.
 - **Code editor** — Edit the code and its original message.
 
+
 ## Supported languages
 
-| Language | Support |
-|---|---|
-| JavaScript | Syntax highlighting |
-| Python | Syntax highlighting |
-| JSON | Syntax highlighting |
-| TypeScript | Syntax highlighting |
-| C++ | Syntax highlighting |
-| Java | Syntax highlighting |
-| Rust | Syntax highlighting |
-| SQL | Syntax highlighting |
+Syntax supports 17 programming and markup languages:
+
+`JavaScript` `Python` `JSON` `TypeScript`
+
+`C++` `Java` `Rust` `SQL`
+
+`Go` `C` `C#` `PHP`
+
+`Ruby` `Swift` `Kotlin` `Bash` `HTML`
+
 
 Language highlighting is powered by [Prism.js](https://prismjs.com/).
 
