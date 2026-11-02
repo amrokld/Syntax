@@ -7,3 +7,34 @@
 @import './styles/04-editor-and-control-layout.css';
 @import './styles/05-prompt-studio.css';
 @import './styles/06-code-layout-and-scrolling.css';
+
+
+
+/* Global Syntax scrollbar */
+* {
+    scrollbar-width: thin;
+    scrollbar-color: #46515a #171a1e;
+}
+
+*::-webkit-scrollbar {
+    width: 9px;
+    height: 9px;
+}
+
+*::-webkit-scrollbar-track {
+    background: #171a1e;
+}
+
+*::-webkit-scrollbar-thumb {
+    background: #46515a;
+    border: 2px solid #171a1e;
+    border-radius: 10px;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+    background: #54d2c8;
+}
+
+body:has(.composer-overlay) {
+    overflow: hidden;
+}

@@ -7,7 +7,7 @@
   align-items: center;
   justify-content: center;
   padding: clamp(18px, 4vw, 48px);
-  overflow-y: auto;
+  overflow-y: hidden;
   background: rgb(10 12 14 / 58%);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
@@ -108,6 +108,7 @@
   .composer-overlay {
     align-items: center;
     padding: 18px 14px calc(66px + env(safe-area-inset-bottom));
+    overflow-y: auto;
   }
 
   .composer {
@@ -234,4 +235,3 @@
   }
 
 }
-

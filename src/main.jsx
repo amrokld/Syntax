@@ -166,6 +166,7 @@ function App() {
   const [promptInstructions, setPromptInstructions] = useState('');
   const [generatedPrompt, setGeneratedPrompt] = useState('');
   const [editorMode, setEditorMode] = useState('prompt');
+  const [copyStatus, setCopyStatus] = useState('idle');
 
   const wrappedSource = useMemo(
     () => wrapSource(source, maxLineChars),
@@ -389,6 +390,19 @@ function App() {
     setGeneratedPrompt('');
   }
 
+  async function handleCopyPrompt() {
+    try {
+      await navigator.clipboard.writeText(generatedPrompt || livePrompt);
+      setCopyStatus('copied');
+    } catch {
+      setCopyStatus('failed');
+    }
+
+    window.setTimeout(() => {
+      setCopyStatus('idle');
+    }, 2000);
+  }
+
   function dismissWelcome() {
     setShowWelcome(false);
 
@@ -398,6 +412,7 @@ function App() {
       // The welcome can still be dismissed if storage is unavalible.
     }
   }
+
 
   return (
     <main className="stage">
@@ -698,11 +713,14 @@ function App() {
                       <span>{(generatedPrompt || livePrompt).length} characters</span>
                       <button
                         type="button"
-                        onClick={() =>
-                          navigator.clipboard.writeText(generatedPrompt || livePrompt)
-                        }
+                        onClick={handleCopyPrompt}
+                        aria-live="polite"
                       >
-                        Copy prompt
+                        {copyStatus === 'copied'
+                          ? 'Copied ✓'
+                          : copyStatus === 'failed'
+                            ? 'Copy failed'
+                            : 'Copy prompt'}
                       </button>
                     </div>
                   </div>

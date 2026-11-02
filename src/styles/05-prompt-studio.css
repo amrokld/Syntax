@@ -1,9 +1,9 @@
 /* Syntax Prompt Studio */
 .prompt-studio {
   width: min(1180px, 100%);
-  max-height: min(88dvh, 920px);
+  max-height: min(94dvh, 1000px);
   overflow: auto;
-  padding: clamp(22px, 3vw, 38px);
+  padding: clamp(18px, 2vw, 28px);
   border: 1px solid #30363d;
   border-radius: 14px;
   background: rgb(22 25 29 / 98%);
@@ -17,7 +17,7 @@
   align-items: flex-start;
   justify-content: space-between;
   gap: 20px;
-  margin-bottom: 30px;
+  margin-bottom: 22px;
 }
 
 .prompt-eyebrow {
@@ -184,8 +184,8 @@
 }
 
 .live-prompt-editor {
-  min-height: 420px;
-  height: min(54dvh, 560px);
+  min-height: 300px;
+  height: min(47dvh, 400px);
   padding: 18px;
   resize: vertical;
   white-space: pre-wrap;
@@ -291,8 +291,8 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 8px;
-  margin: 0 0 28px;
-  padding-bottom: 12px;
+  margin: 0 0 20px;
+  padding-bottom: 8px;
   border-bottom: 1px solid #30373e;
 }
 
@@ -301,7 +301,7 @@
   align-items: center;
   justify-content: center;
   gap: 10px;
-  padding: 14px 12px;
+  padding: 11px 12px;
   border: 1px solid #30373e;
   border-radius: 8px;
   background: #1b1f23;
@@ -338,8 +338,8 @@
 }
 
 .prompt-import-layout .prompt-preview-panel>textarea {
-  min-height: 420px;
-  height: min(54dvh, 560px);
+  min-height: 300px;
+  height: min(47dvh, 400px);
   resize: vertical;
 }
 
@@ -367,8 +367,8 @@
 
 .prompt-import-layout .prompt-preview-panel>textarea {
   width: 100%;
-  min-height: 420px;
-  height: min(54dvh, 560px);
+  min-height: 300px;
+  height: min(47dvh, 400px);
   resize: vertical;
 }
 
@@ -402,8 +402,8 @@
 .prompt-import-layout .prompt-preview-panel>textarea {
   display: block;
   width: 100%;
-  min-height: 420px;
-  height: min(54dvh, 560px);
+  min-height: 300px;
+  height: min(47dvh, 400px);
 }
 
 @media (max-width: 760px) {
