@@ -1,5 +1,5 @@
 import Prism from 'prismjs';
-import 'prismjs/components/prism-python';
+import 'prismjs/components/prism-python.js';
 
 export const id = 'python';
 

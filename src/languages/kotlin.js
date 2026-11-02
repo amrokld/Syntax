@@ -1,5 +1,5 @@
 import Prism from 'prismjs';
-import 'prismjs/components/prism-kotlin';
+import 'prismjs/components/prism-kotlin.js';
 
 export const id = 'kotlin';
 

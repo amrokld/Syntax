@@ -1,6 +1,6 @@
 
 import Prism from 'prismjs';
-import 'prismjs/components/prism-go';
+import 'prismjs/components/prism-go.js';
 
 export const id = 'go';
 

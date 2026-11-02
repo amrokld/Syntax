@@ -1,6 +1,6 @@
 import Prism from 'prismjs';
-import 'prismjs/components/prism-c';
-import 'prismjs/components/prism-cpp';
+import 'prismjs/components/prism-c.js';
+import 'prismjs/components/prism-cpp.js';
 
 export const id = 'cpp';
 

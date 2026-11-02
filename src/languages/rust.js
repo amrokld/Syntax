@@ -1,5 +1,5 @@
 import Prism from 'prismjs';
-import 'prismjs/components/prism-rust';
+import 'prismjs/components/prism-rust.js';
 
 export const id = 'rust';
 

@@ -1,5 +1,5 @@
 import Prism from 'prismjs';
-import 'prismjs/components/prism-json';
+import 'prismjs/components/prism-json.js';
 
 export const id = 'json';
 

@@ -1,7 +1,7 @@
 import Prism from 'prismjs';
-import 'prismjs/components/prism-markup';
-import 'prismjs/components/prism-markup-templating';
-import 'prismjs/components/prism-php';
+import 'prismjs/components/prism-markup.js';
+import 'prismjs/components/prism-markup-templating.js';
+import 'prismjs/components/prism-php.js';
 
 export const id = 'php';
 

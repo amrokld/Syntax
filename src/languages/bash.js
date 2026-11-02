@@ -1,5 +1,5 @@
 import Prism from 'prismjs';
-import 'prismjs/components/prism-bash';
+import 'prismjs/components/prism-bash.js';
 
 export const id = 'bash';
 

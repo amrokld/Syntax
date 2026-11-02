@@ -47,15 +47,15 @@ export function detectLanguage(source) {
     if (php.detect(source)) return php.id;
     if (csharp.detect(source)) return csharp.id;
     if (kotlin.detect(source)) return kotlin.id;
-    if (swift.detect(source)) return swift.id;
     if (ruby.detect(source)) return ruby.id;
     if (sql.detect(source)) return sql.id;
 
     // C-family and systems languages.
-    if (cpp.detect(source)) return cpp.id;
     if (go.detect(source)) return go.id;
     if (rust.detect(source)) return rust.id;
+    if (swift.detect(source)) return swift.id;
     if (c.detect(source)) return c.id;
+    if (cpp.detect(source)) return cpp.id;
     if (java.detect(source)) return java.id;
     if (typescript.detect(source)) return typescript.id;
     if (python.detect(source)) return python.id;
