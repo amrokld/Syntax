@@ -8,38 +8,41 @@ Explore different programming languages, customize the code, and discover the me
 
 ![Syntax application screenshot](docs/screenshot.png)
 
+
 ## Features
 
 - **Animated code reveal** — Watch code unfold character by character.
 - **Playback controls** — Pause, resume, replay, and adjust animation speed.
-- **Automatic language detection** — Detect the programming language from the current code.
-- **Multiple languages** — Syntax highlighting for eight programming languages.
-- **Import your own code** — Import existing code and provide the original message behind it.
+- **Automatic language detection** — Identify the programming language from the current code.
+- **17 supported languages** — Syntax highlighting across 17 programming and markup languages.
+- **Import your own code** — Import existing code and provide its original message.
 - **Prompt Studio** — Prepare prompts and customize code-generation instructions.
 - **Message reveal** — Reveal the original message associated with the code.
 - **Code editor** — Edit the code and its original message.
+
+
 
 
 ## Supported languages
 
 Syntax supports 17 programming and markup languages:
 
-`JavaScript` `Python` `JSON` `TypeScript`
+`JavaScript` `Python` `JSON` `TypeScript` `C++`
 
-`C++` `Java` `Rust` `SQL`
+`Java` `Rust` `SQL` `Go` `C`
 
-`Go` `C` `C#` `PHP`
+`C#` `PHP` `Ruby` `Swift` `Kotlin`
 
-`Ruby` `Swift` `Kotlin` `Bash` `HTML`
+`Bash` `HTML`
 
+Language syntax highlighting is powered by [Prism.js](https://prismjs.com/).
 
-Language highlighting is powered by [Prism.js](https://prismjs.com/).
 
 ## Getting started
 
 ### Requirements
 
-- Node.js
+- Node.js 18 or later
 - npm
 
 ### Installation
@@ -79,6 +82,20 @@ Preview the production build locally:
 npm run preview
 ```
 
+## Testing
+
+Run the automated test suite:
+
+```bash
+npm test
+```
+
+The test suite covers:
+
+- Language detection across all 17 supported languages.
+- Prism grammar availability.
+- Regression tests for previously identified language detection conflicts.
+
 ## Safety
 
 Syntax displays code as text. Imported or generated code is **never executed**.
@@ -90,6 +107,7 @@ Syntax displays code as text. Imported or generated code is **never executed**.
 - Prism.js
 - JavaScript
 - CSS
+- Node.js test runner
 
 ---
 
