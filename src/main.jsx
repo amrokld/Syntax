@@ -48,17 +48,29 @@ const LANGUAGE_LABELS = {
   bash: 'Bash',
   html: 'HTML',
   sql: 'SQL',
+  human: 'Human',
+  cat: 'Cat',
+  dog: 'Dog',
+  idk: 'IDK',
 };
 
 function LanguageIcon({ id }) {
   const iconClass = LANGUAGE_ICONS[id];
 
-  if (id === 'sql') {
+  const imageIcons = ['sql', 'human', 'cat', 'dog', 'idk'];
+
+  if (imageIcons.includes(id)) {
     return <img src={iconClass} className="language-icon" alt="" />;
   }
 
   if (!iconClass) {
-    return <span className="language-icon-fallback">SQL</span>;
+    return (
+      <img
+        src={LANGUAGE_ICONS.idk}
+        className="language-icon"
+        alt=""
+      />
+    );
   }
 
   return (
@@ -116,6 +128,120 @@ function EyeIcon() {
 
 
 function buildPrompt(message, language, instructions) {
+  const languageId = language.toLowerCase().trim();
+
+  // Human: preserve the original message exactly.
+  if (languageId === 'human') {
+    return `You are a creative human-language composer.
+
+Transform the original message into an expressive, beautifully structured written composition.
+
+STYLE:
+- Write entirely in natural, human-understandable language.
+- Use Markdown-style organization where appropriate.
+- You may use headings, paragraphs, lists, quotations, and emphasis.
+- Give the composition a distinctive structure that reflects the message's meaning and emotional tone.
+- Make it feel intentional, polished, and expressive.
+- Do not write programming code, pseudocode, or artificial syntax.
+- Do not simply repeat the original message.
+
+LENGTH REQUIREMENTS:
+- Minimum: 20 physical lines.
+- Maximum: 30 physical lines.
+- Count blank lines as lines.
+- Plan the composition before writing.
+- Never exceed 30 lines or produce fewer than 20.
+
+ORIGINAL MESSAGE:
+"""
+${message}
+"""
+
+CREATIVE DIRECTION:
+${instructions.trim() || 'Interpret the message creatively. Choose a distinctive structure and writing style.'}
+
+OUTPUT FORMAT:
+- Return exactly one Markdown code block.
+- Use markdown as the code block language identifier.
+- Include the complete composition inside the code block.
+- Do not include any introduction or explanation outside it.`;
+  }
+
+  // Cat: exclusively meow.
+  if (languageId === 'cat') {
+    return `You are an expressive cat-language composer.
+
+Transform the original message into a highly expressive, organized Cat-language composition.
+
+CAT LANGUAGE:
+- Use cat expressions such as "meow", "Meow", "MEOW", "MEOWWWW", "mrrp", "mrow", "nya", "prrr", "hiss", "mew" and other recognizable cat sounds.
+- You may vary capitalization, repetition, and combinations freely.
+- Be creative with the sounds to express different emotions, reactions, and meanings.
+- Make the composition feel genuinely feline: curious, playful, affectionate, dramatic, annoyed, sleepy, mischievous, or whatever fits the original message.
+- Express as much of the original meaning and emotional nuance as possible using cat language.
+- Do not use ordinary English sentences or explanations.
+- Do not translate the original message word-for-word.
+
+STRUCTURE:
+- Organize the composition creatively using repetitions, spacing, and line breaks.
+- Minimum: 15 physical lines.
+- Maximum: 30 physical lines.
+- Count blank lines as lines.
+- Make every line contribute to the composition.
+
+ORIGINAL MESSAGE:
+"""
+${message}
+"""
+
+CREATIVE DIRECTION:
+${instructions.trim() || 'Express the message as creatively and naturally as possible in cat language.'}
+
+OUTPUT FORMAT:
+- Return exactly one Markdown code block.
+- Use the language identifier "cat".
+- Include the complete composition inside the code block.
+- No introduction, explanation, or text outside the code block.`;
+  }
+
+  // Dog: exclusively hao.
+  if (languageId === 'dog') {
+    return `You are an expressive dog-language composer.
+
+Transform the original message into a highly expressive, organized Dog-language composition.
+
+DOG LANGUAGE:
+- Use dog expressions such as "hao", "Hao", "HAO", "HAOWWW", "woof", "WOOF", "bark", "arf", "awoo", "grr", "ruff" and other recognizable dog sounds.
+- You may vary capitalization, repetition, and combinations freely.
+- Be creative with the sounds to express different emotions, reactions, and meanings.
+- Make the composition feel genuinely canine: playful, loyal, excited, protective, curious, affectionate, dramatic, sleepy, or whatever fits the original message.
+- Express as much of the original meaning and emotional nuance as possible using dog language.
+- Do not use ordinary English sentences or explanations.
+- Do not translate the original message word-for-word.
+
+STRUCTURE:
+- Organize the composition creatively using repetitions, spacing, and line breaks.
+- Minimum: 15 physical lines.
+- Maximum: 30 physical lines.
+- Count blank lines as lines.
+- Make every line contribute to the composition.
+
+ORIGINAL MESSAGE:
+"""
+${message}
+"""
+
+CREATIVE DIRECTION:
+${instructions.trim() || 'Express the message as creatively and naturally as possible in dog language.'}
+
+OUTPUT FORMAT:
+- Return exactly one Markdown code block.
+- Use the language identifier "dog".
+- Include the complete composition inside the code block.
+- No introduction, explanation, or text outside the code block.`;
+  }
+
+  // Existing programming-language behavior.
   return `You are a creative code artist. Transform the original message into an expressive, visually interesting code composition.
 
 LANGUAGE:

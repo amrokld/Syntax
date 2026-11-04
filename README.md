@@ -14,7 +14,7 @@ Explore different programming languages, customize the code, and discover the me
 - **Animated code reveal** — Watch code unfold character by character.
 - **Playback controls** — Pause, resume, replay, and adjust animation speed.
 - **Automatic language detection** — Identify the programming language from the current code.
-- **17 supported languages** — Syntax highlighting across 17 programming and markup languages.
+- **19 supported languages** — Syntax highlighting across 19 programming and markup languages.
 - **Import your own code** — Import existing code and provide its original message.
 - **Prompt Studio** — Prepare prompts and customize code-generation instructions.
 - **Message reveal** — Reveal the original message associated with the code.
@@ -34,6 +34,8 @@ Syntax supports 17 programming and markup languages:
 `C#` `PHP` `Ruby` `Swift` `Kotlin`
 
 `Bash` `HTML`
+
+`Human` `Cat` `Dog`
 
 Language syntax highlighting is powered by [Prism.js](https://prismjs.com/).
 

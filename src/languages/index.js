@@ -15,6 +15,10 @@ import * as swift from './swift.js';
 import * as kotlin from './kotlin.js';
 import * as bash from './bash.js';
 import * as html from './markup.js';
+import * as human from './human.js';
+import * as cat from './cat.js';
+import * as dog from './dog.js';
+import * as idk from './idk.js';
 
 export const languages = {
     javascript,
@@ -34,6 +38,10 @@ export const languages = {
     kotlin,
     bash,
     html,
+    human,
+    cat,
+    dog,
+    idk,
 };
 
 
@@ -60,10 +68,14 @@ export function detectLanguage(source) {
     if (typescript.detect(source)) return typescript.id;
     if (python.detect(source)) return python.id;
 
-    // JavaScript is the fallback.
     if (javascript.detect(source)) return javascript.id;
 
-    return javascript.id;
+    if (cat.detect(source)) return cat.id;
+    if (dog.detect(source)) return dog.id;
+    if (human.detect(source)) return human.id;
+
+    // Anything not recognized is unsupported for now.
+    return 'idk';
 }
 
 

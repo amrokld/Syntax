@@ -83,3 +83,9 @@ test('handles previously conflicting language syntax', async (t) => {
     }
 });
 
+test('detects custom languages correctly', () => {
+    assert.equal(detectLanguage('Hello, how are you?'), 'human');
+    assert.equal(detectLanguage('meow meow meow'), 'cat');
+    assert.equal(detectLanguage('hao hao hao'), 'dog');
+    assert.equal(detectLanguage('@@@ ### $$$'), 'idk');
+});
