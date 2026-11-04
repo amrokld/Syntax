@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import Prism from 'prismjs';
 import 'prismjs/themes/prism-tomorrow.css';
@@ -191,6 +191,9 @@ function App() {
 
   const [draftMessage, setDraftMessage] = useState(SAMPLE_MESSAGE);
   const [importedCode, setImportedCode] = useState(SAMPLE_CODE);
+  const [importError, setImportError] = useState('');
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [showUnsavedWarning, setShowUnsavedWarning] = useState(false);
   const [promptInstructions, setPromptInstructions] = useState('');
   const [generatedPrompt, setGeneratedPrompt] = useState('');
   const [editorMode, setEditorMode] = useState('prompt');
@@ -206,6 +209,7 @@ function App() {
   const visibleSource = wrappedSource.slice(0, visibleChars);
   const complete = visibleChars >= wrappedSource.length;
   const visibleLines = visibleSource.split('\n');
+  const composerSnapshot = useRef(null);
 
   const livePrompt = useMemo(
     () =>
@@ -344,14 +348,24 @@ function App() {
     const form = event.currentTarget;
     let newCode = form.elements.code.value.trim();
 
-    const lines = newCode.split("\n");
+    const lines = newCode.split('\n');
     const firstLine = lines[0].trim();
 
-    if (firstLine.startsWith("```") && lines[lines.length - 1].trim() === "```") {
-      newCode = lines.slice(1, -1).join("\n").trim();
+    if (firstLine.startsWith('```') && lines[lines.length - 1].trim() === '```') {
+      newCode = lines.slice(1, -1).join('\n').trim();
     }
 
-    if (!newCode) return;
+    if (!newCode) {
+      setImportError('I think you forgot to put the code in the Generated code box! check again.');
+      return;
+    }
+
+    if (!draftMessage.trim()) {
+      setImportError('You need the original message to play the generated code message, It supposes to appear automatically, but idk... please put it again.');
+      return;
+    }
+
+    setImportError('');
 
     setSource(newCode);
     setImportedCode(newCode);
@@ -359,6 +373,33 @@ function App() {
     setShowMessage(false);
     setShowComposer(false);
     setShowSpeedOptions(false);
+  }
+
+  function requestCloseComposer() {
+    if (hasUnsavedChanges) {
+      setShowUnsavedWarning(true);
+      return;
+    }
+
+    setShowComposer(false);
+  }
+
+  function discardChangesAndClose() {
+    const snapshot = composerSnapshot.current;
+
+    if (snapshot) {
+      setDraftMessage(snapshot.draftMessage);
+      setOriginalMessage(snapshot.draftMessage);
+      setImportedCode(snapshot.importedCode);
+      setPromptInstructions(snapshot.promptInstructions);
+      setGeneratedPrompt(snapshot.generatedPrompt);
+      setLanguageOverride(snapshot.languageOverride);
+    }
+
+    setImportError('');
+    setHasUnsavedChanges(false);
+    setShowUnsavedWarning(false);
+    setShowComposer(false);
   }
 
   // Close the small menus when the user clicks anywhere outside them.
@@ -373,6 +414,14 @@ function App() {
     }
   }
 
+  useEffect(() => {
+    document.addEventListener(`pointerdown`, handleOutsidePointerDown);
+
+    return () => {
+      document.removeEventListener('pointerdown', handleOutsidePointerDown);
+    }
+  })
+
   // Shortcuts: Space = pause/play, R = replay, M = message, E = editor, Esc = close.
   useEffect(() => {
     function handleKeyDown(event) {
@@ -383,14 +432,14 @@ function App() {
           ['INPUT', 'TEXTAREA', 'SELECT', 'BUTTON', 'A'].includes(target.tagName) ||
           target.getAttribute('role') === 'button');
 
-      if (isInteractiveTarget || event.altKey || event.ctrlKey || event.metaKey) return;
-
       if (event.key === 'Escape') {
         setShowMessage(false);
-        setShowComposer(false);
+        requestCloseComposer();
         setShowSpeedOptions(false);
         return;
       }
+
+      if (isInteractiveTarget || event.altKey || event.ctrlKey || event.metaKey) return;
 
       if (event.code === 'Space') {
         event.preventDefault();
@@ -406,7 +455,7 @@ function App() {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [reducedMotion, wrappedSource.length]);
+  }, [reducedMotion, wrappedSource.length, hasUnsavedChanges]);
 
   function handleGeneratePrompt(event) {
     event.preventDefault();
@@ -594,7 +643,19 @@ function App() {
 
         <button
           className="control-button"
-          onClick={() => setShowComposer((current) => !current)}
+          onClick={() => {
+            composerSnapshot.current = {
+              draftMessage,
+              importedCode,
+              promptInstructions,
+              generatedPrompt,
+              languageOverride,
+            };
+
+            setHasUnsavedChanges(false);
+            setShowUnsavedWarning(false);
+            setShowComposer(true);
+          }}
           data-tooltip="Edit code & message · E"
           data-tooltip-align="right"
           aria-label="Edit code and message"
@@ -609,7 +670,7 @@ function App() {
         <div
           className="composer-overlay"
           role="presentation"
-          onClick={() => setShowComposer(false)}
+          onClick={requestCloseComposer}
         >
           <section
             className="prompt-studio"
@@ -628,12 +689,37 @@ function App() {
               <button
                 type="button"
                 className="prompt-close"
-                onClick={() => setShowComposer(false)}
+                onClick={requestCloseComposer}
                 aria-label="Close editor"
               >
                 ×
               </button>
             </header>
+
+            {showUnsavedWarning && (
+              <div className="unsaved-warning">
+                <div className="unsaved-warning-content">
+                  <h3>Unsaved changes</h3>
+                  <p>You have unsaved changes. Are you sure you want to leave?</p>
+
+                  <div className="unsaved-warning-actions">
+                    <button
+                      type="button"
+                      onClick={() => setShowUnsavedWarning(false)}
+                    >
+                      Keep editing
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={discardChangesAndClose}
+                    >
+                      Discard changes
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
 
             <nav className="studio-tabs" aria-label="Studio mode">
               <button
@@ -661,6 +747,7 @@ function App() {
                   <form
                     className="prompt-controls"
                     onSubmit={handleGeneratePrompt}
+                    onValidate
                   >
                     <div className="prompt-section-heading">
                       <span>01</span>
@@ -678,6 +765,7 @@ function App() {
                           setDraftMessage(message);
                           setOriginalMessage(message);
                           setGeneratedPrompt('');
+                          setHasUnsavedChanges(true);
                         }}
                         placeholder="What do you want to express?"
                         required
@@ -686,7 +774,10 @@ function App() {
 
 
                     <div className="editor-field">
-                      <label>Language</label>
+                      <label>
+                        Language
+                        {languageOverride && <span className="language-mode-indicator">MANUAL</span>}
+                      </label>
 
                       <div className="language-select">
                         <button
@@ -754,6 +845,7 @@ function App() {
                         onChange={(event) => {
                           setPromptInstructions(event.target.value);
                           setGeneratedPrompt('');
+                          setHasUnsavedChanges(true);
                         }}
                         placeholder="Poetic, minimalist, recursive, dark..."
                       />
@@ -776,7 +868,11 @@ function App() {
                       className="live-prompt-editor"
                       aria-label="Edit generated prompt"
                       value={generatedPrompt || livePrompt}
-                      onChange={(event) => setGeneratedPrompt(event.target.value)}
+                      onChange={(event) => {
+                        setGeneratedPrompt(event.target.value);
+                        setHasUnsavedChanges(true);
+                      }}
+
                       spellCheck="false"
                     />
 
@@ -801,6 +897,7 @@ function App() {
                 <form
                   className="prompt-import-form"
                   onSubmit={handleSubmit}
+                  noValidate
                 >
 
                   <div className="prompt-import-layout">
@@ -818,8 +915,10 @@ function App() {
                           value={draftMessage}
                           onChange={(event) => {
                             const message = event.target.value;
+                            setImportError('');
                             setDraftMessage(message);
                             setOriginalMessage(message);
+                            setHasUnsavedChanges(true);
                           }}
                           placeholder="Enter the message this code represents..."
                           required
@@ -837,7 +936,11 @@ function App() {
                         id="code-input"
                         name="code"
                         value={importedCode}
-                        onChange={(event) => setImportedCode(event.target.value)}
+                        onChange={(event) => {
+                          setImportedCode(event.target.value);
+                          setImportError('');
+                          setHasUnsavedChanges(true);
+                        }}
                         spellCheck="false"
                         required
                       />
@@ -845,7 +948,9 @@ function App() {
                   </div>
 
                   <div className="prompt-control-footer">
-                    <span>{LANGUAGE_LABELS[promptLanguage] || promptLanguage}</span>
+                    <span className={importError ? 'import-error' : ''}>
+                      {importError || LANGUAGE_LABELS[promptLanguage] || promptLanguage}
+                    </span>
                     <button type="submit">Play message ↗</button>
                   </div>
                 </form>
