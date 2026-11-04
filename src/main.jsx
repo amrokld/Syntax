@@ -2,6 +2,8 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import Prism from 'prismjs';
 import 'prismjs/themes/prism-tomorrow.css';
+import 'devicon/devicon.min.css';
+import { LANGUAGE_ICONS } from './languages/icons.js';
 
 import {
   detectLanguage,
@@ -9,6 +11,7 @@ import {
 } from './languages/index.js';
 
 import './style.css';
+import { i } from 'framer-motion/client';
 
 const SAMPLE_CODE = `const message = {
   to: "you",
@@ -46,6 +49,22 @@ const LANGUAGE_LABELS = {
   html: 'HTML',
   sql: 'SQL',
 };
+
+function LanguageIcon({ id }) {
+  const iconClass = LANGUAGE_ICONS[id];
+
+  if (id === 'sql') {
+    return <img src={iconClass} className="language-icon" alt="" />;
+  }
+
+  if (!iconClass) {
+    return <span className="language-icon-fallback">SQL</span>;
+  }
+
+  return (
+    <i className={`${iconClass} language-icon`} aria-hidden="true" />
+  );
+}
 
 function wrapSource(source, maxChars = MAX_LINE_CHARS) {
   return source
@@ -559,7 +578,7 @@ function App() {
             data-tooltip="Detected code language"
             aria-label={`Detected code language: ${LANGUAGE_LABELS[language] || language}`}
           >
-            <span className="language-dot" />
+            <LanguageIcon id={language} />
             {LANGUAGE_LABELS[language] || language}
           </div>
         </div>
@@ -677,7 +696,8 @@ function App() {
                           aria-haspopup="listbox"
                           aria-expanded={showLanguageOptions}
                         >
-                          <span>
+                          <span className="language-select-value">
+                            {languageOverride && <LanguageIcon id={languageOverride} />}
                             {LANGUAGE_LABELS[languageOverride] || 'Auto detect'}
                           </span>
                           <span className="language-select-arrow">▾</span>
@@ -712,7 +732,10 @@ function App() {
                                   setShowLanguageOptions(false);
                                 }}
                               >
-                                {label}
+                                <span className="language-option-content">
+                                  <LanguageIcon id={id} />
+                                  {label}
+                                </span>
                               </button>
                             ))}
                           </div>

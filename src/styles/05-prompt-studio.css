@@ -484,3 +484,30 @@
   background: rgb(84 210 200 / 12%);
   color: #54d2c8;
 }
+
+.language-icon {
+  display: inline-block;
+  font-size: 16px;
+  line-height: 1;
+  width: 16px;
+  flex: 0 0 16px;
+  text-align: center;
+}
+
+.language-option-content,
+.language-select-value {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.language-icon-fallback {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  flex: 0 0 20px;
+  font-size: 9px;
+  font-weight: 700;
+}
